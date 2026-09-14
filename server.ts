@@ -9,6 +9,8 @@ import {
   predictChurn,
   predictAnomaly,
 } from './server/mlService';
+import { analyzeNetwork } from './server/telecom2/correlationEngine';
+import { SITES, CELLS, WILAYAS } from './server/telecom2/telecomDataStore';
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
@@ -45,7 +47,7 @@ app.post(['/api/predict/churn', '/predict/churn'], (req, res) => {
   }
 });
 
-// 6. Network Anomaly Prediction Endpoint
+// 6. Network Anomaly Prediction Endpoint (1.0 Legacy)
 app.post(['/api/predict/anomaly', '/predict/anomaly'], (req, res) => {
   try {
     const result = predictAnomaly(req.body);
@@ -53,6 +55,43 @@ app.post(['/api/predict/anomaly', '/predict/anomaly'], (req, res) => {
   } catch (err: any) {
     res.status(500).json({ error: `Inference error: ${err.message}` });
   }
+});
+
+// ==========================================
+// TELECOMAI 2.0 API FLOW
+// ==========================================
+
+// 7. Network Intelligence & Correlation Endpoint (TelecomAI 2.0 Core Flow)
+// POST /api/network/analyze
+// Ingests anomaly / network scope ➔ Runs correlation ➔ Assesses Customer & Business Impact ➔ Outputs Incident & Recommendations
+app.post(['/api/network/analyze', '/network/analyze'], (req, res) => {
+  try {
+    const result = analyzeNetwork(req.body || {});
+    res.json(result);
+  } catch (err: any) {
+    console.error('Error analyzing network:', err);
+    res.status(500).json({ error: `Network correlation analysis error: ${err.message}` });
+  }
+});
+
+// Optional GET variant for convenient browser inspection or test triggers
+app.get(['/api/network/analyze', '/network/analyze'], (req, res) => {
+  try {
+    const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya : 'Saida';
+    const result = analyzeNetwork({ wilaya });
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: `Network correlation analysis error: ${err.message}` });
+  }
+});
+
+// 8. Network Topology & Hierarchy (Wilaya ➔ Site ➔ Cells)
+app.get(['/api/network/topology', '/network/topology'], (_req, res) => {
+  res.json({
+    wilayas: WILAYAS,
+    sites: SITES,
+    cells: CELLS,
+  });
 });
 
 // Vite middleware setup for serving the React frontend

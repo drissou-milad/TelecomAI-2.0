@@ -1,82 +1,81 @@
-# TelecomAI — System Architecture & Engineering Specifications
+# TelecomAI 2.0 — System Architecture
 
-## 1. High-Level Architecture Overview
+## 1. High-Level Vision & Evolution
 
-TelecomAI follows a decoupled, three-tier enterprise architecture separating data processing, machine learning inference, API orchestration, and reactive presentation:
+TelecomAI 1.0 served as a standalone machine learning proof-of-concept for churn prediction and cell anomaly detection.
+
+**TelecomAI 2.0** re-engineers this foundation into an integrated **Autonomous Operations & Customer Impact Intelligence Platform**:
+`Understand → Correlate → Prioritize → Act`
 
 ```
-                          TELECOMAI PLATFORM
-                                  │
-         ┌────────────────────────┴────────────────────────┐
-         │                                                 │
-  CUSTOMER DATA                                      NETWORK DATA
- (10k Subscribers)                                  (1,000 Cells)
-         │                                                 │
-         ▼                                                 ▼
-   Preprocessing                                     Preprocessing
-  (StandardScaler)                                  (StandardScaler)
-         │                                                 │
-         ▼                                                 ▼
-  Churn ML Pipeline                                 Anomaly Pipeline
- (GradBoost, RF, LR, DT)                           (Isolation Forest)
-         │                                                 │
-         ▼                                                 ▼
-   Champion Model                                   Outlier Detector
-(champion_model.joblib)                         (isolation_forest.joblib)
-         │                                                 │
-         └────────────────────────┬────────────────────────┘
-                                  ▼
-                        FastAPI Backend Layer
-                     (/api/predict/churn, etc.)
-                                  │
-                                  ▼
-                         Express / Reverse Proxy
-                              (Port 3000)
-                                  │
-                                  ▼
-                        React + Tailwind UI
-                       (Interactive Dashboard)
+                    TELECOM DATA
+                         │
+            ┌────────────┴────────────┐
+            ↓                         ↓
+      NETWORK DATA              CUSTOMER DATA
+            │                         │
+            ↓                         ↓
+   Network Intelligence       CX Intelligence
+            │                         │
+            └────────────┬────────────┘
+                         ↓
+                AI CORRELATION ENGINE
+                         │
+                         ↓
+                 CUSTOMER IMPACT
+                         │
+                         ↓
+                  BUSINESS IMPACT
+                         │
+                         ↓
+              INCIDENT INTELLIGENCE
+                         │
+                  ┌──────┴──────┐
+                  ↓             ↓
+             PRIORITY       AI ANALYSIS
+                  │             │
+                  └──────┬──────┘
+                         ↓
+                 RECOMMENDED ACTION
+                         │
+                         ↓
+                  ITSM CONNECTOR
 ```
 
 ---
 
-## 2. Component Specifications
+## 2. Core Operational Pipeline
 
-### 2.1 Machine Learning Tier (`/ml`)
-- **Language**: Python 3.10+
-- **Core Frameworks**: `scikit-learn`, `pandas`, `numpy`, `joblib`, `shap`
-- **Pipelines**:
-  - `ml/churn/train.py`: Multi-model benchmarking with 5-fold stratified cross-validation and dynamic champion selection.
-  - `ml/churn/evaluate.py`: Generates confusion matrices, ROC curves, and global SHAP feature importances.
-  - `ml/churn/predict.py`: Standalone inference class with real `shap.TreeExplainer`.
-  - `ml/anomaly/train.py`: Unsupervised Isolation Forest model training on 5 cellular KPIs.
-  - `ml/anomaly/predict.py`: Unsupervised anomaly scorer with decision function density evaluation.
+### 2.1 Network Intelligence
+- Ingests cell-level 3GPP telemetry (PRB utilization, Latency RTT, Packet Loss %, Throughput Mbps, Availability %, CDR, CSSR).
+- Tracks hierarchical relationships: **Wilaya** ➔ **Site** (Base Station / eNodeB / gNodeB) ➔ **Cell** (Radio Carrier Sector).
+- Detects multi-metric anomalies based on deviations from running statistical baselines.
 
-### 2.2 FastAPI Backend Tier (`/backend`)
-- **Framework**: `FastAPI` + `Uvicorn` + `Pydantic v2`
-- **Endpoints**:
-  - `POST /api/predict/churn`: Accepts subscriber telemetry, validates via Pydantic, invokes Champion Model, computes real SHAP attributions, and returns structured risk mitigation actions.
-  - `GET /api/churn/benchmark`: Returns cross-validation benchmark metrics and confusion matrices across evaluated algorithms.
-  - `POST /api/predict/anomaly`: Evaluates cell sector telemetry with Isolation Forest, returning outlier scores and AI Recommended Actions.
-  - `GET /api/anomaly/specs`: Returns Isolation Forest contamination parameters and telemetry distributions.
-  - `GET /api/health`: Provides subsystem health status and model availability verification.
-  - `/docs` & `/redoc`: Interactive OpenAPI documentation.
+### 2.2 Customer Experience (CX) Intelligence
+- Tracks subscribers, active service subscriptions, monthly billing/spend (DZD), voice/data quotas, tenure, and customer care tickets.
+- Tracks **Network Exposure**: which cell carrier a subscriber is connected to and their recent degradation history.
+- Calculates dynamic **Customer Experience Index (CEI)** (0–100) combining Network QoE, Service/Billing dispute history, Usage stability, and Tenure loyalty.
 
-### 2.3 Frontend Tier (`/src`)
-- **Framework**: React 18+ with TypeScript and Vite
-- **Styling**: Tailwind CSS with enterprise dark slate palette
-- **Data Visualization**: Recharts, D3, Lucide icons, Motion
-- **Pages**:
-  - `OverviewPage`: Executive KPIs, network health summary, subscriber risk distribution.
-  - `PredictionsPage`: Interactive churn simulator with real SHAP attribution watermarks and multi-model benchmark comparisons.
-  - `AnomalyPage`: Live cellular radio health map, outlier inspection, and AI Recommended Actions.
-  - `CustomersPage`: Detailed subscriber directory with drill-down views (including customer C10245 with real SHAP attributions).
-  - `AnalyticsPage`: Regional telecom analytics across Algerian wilayas (Algiers, Oran, Constantine, Annaba).
+### 2.3 AI Correlation Engine
+- Resolves the causal chain:
+  `Physical RAN Degradation ➔ Poor Subscriber QoE ➔ Churn Acceleration`
+- Evaluates real blast radius: maps degraded cells to actively connected subscribers.
+- Quantifies **Business Impact**: aggregate monthly revenue at risk (DZD) and elevated churn probability for affected subscribers.
+
+### 2.4 Incident Intelligence
+- Groups related cellular anomalies into singular, deduplicated **Telecom Incidents**.
+- Determines severity (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`) and dynamically calculates operational priority (`P1`, `P2`, `P3`, `P4`) based on customer blast radius, revenue exposure, and service criticality.
+- Provides AI-synthesized root-cause evidence and confidence scoring.
+
+### 2.5 Recommended Actions & ITSM Connector
+- Generates engineering playbooks (e.g. antenna tilt rebalancing, microwave backhaul carrier failover, RRU reset) and customer care compensations (e.g. 5GB goodwill data credit).
+- Connects to enterprise ITSM systems (ServiceNow Table API, Jira Service Management REST API, Webhooks).
 
 ---
 
-## 3. Strict Model Availability & Error Handling
+## 3. Data Integrity & Traceability Mandate
 
-To preserve production engineering integrity:
-- **No Pseudo-ML Fallbacks**: If model weight artifacts (`champion_model.joblib` or `isolation_forest.joblib`) are missing, the API does NOT invent fallback numbers. Instead, it explicitly raises `HTTP 503 Service Unavailable` with `"ML model unavailable. Train the model first."`
-- **Explainability Transparency**: If SHAP is uninitialized, attributions are honestly designated as **Feature Attribution** rather than claiming fake SHAP calculations.
+Every single number displayed in TelecomAI 2.0 must have a verifiable origin:
+$$\text{UI Component} \longrightarrow \text{REST API} \longrightarrow \text{Correlation Service} \longrightarrow \text{Data / Baseline Model}$$
+
+No arbitrary or hardcoded placeholder values are used.
