@@ -182,7 +182,66 @@ export interface Incident2 {
 }
 
 // ==========================================
-// 4. API CONTRACTS
+// 4. ITSM DOMAIN CONTRACTS
+// ==========================================
+
+export interface ITSMTicketRequest {
+  incident_id: string;
+  title: string;
+  priority: IncidentPriority;
+  severity: IncidentSeverity;
+  affected_infrastructure: {
+    wilaya: string;
+    sites: number;
+    cells: number;
+    cell_ids: string[];
+    site_ids: string[];
+  };
+  customer_impact: {
+    affected_customers: number;
+    high_risk_customers: number;
+  };
+  business_impact: {
+    impact_score: number;
+    revenue_at_risk_dzd: number;
+  };
+  ai_assessment: string;
+  recommended_action: string;
+  confidence: number;
+  system?: 'ServiceNow' | 'Jira Service Management' | 'BMC Remedy';
+}
+
+export interface ITSMTicket {
+  ticket_id: string;
+  incident_id: string;
+  external_url: string;
+  system: 'ServiceNow' | 'Jira Service Management' | 'BMC Remedy';
+  priority: IncidentPriority;
+  severity: IncidentSeverity;
+  status: 'NEW' | 'ASSIGNED' | 'WORK_IN_PROGRESS' | 'RESOLVED';
+  assigned_group: string;
+  created_at: string;
+  updated_at: string;
+  summary: string;
+  work_notes: string[];
+}
+
+// ==========================================
+// 5. SIMULATION CONTRACTS
+// ==========================================
+
+export interface SimulationState {
+  isActive: boolean;
+  scenarioName: string;
+  targetWilaya: string;
+  degradedCellCount: number;
+  simulatedIncidentId: string;
+  startedAt: string | null;
+  currentAnomalyCount: number;
+}
+
+// ==========================================
+// 6. API CONTRACTS
 // ==========================================
 
 export interface NetworkAnalyzeRequest {
@@ -232,3 +291,4 @@ export interface NetworkAnalyzeResponse {
     generated_at: string;
   };
 }
+

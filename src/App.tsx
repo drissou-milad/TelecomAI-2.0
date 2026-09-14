@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
+import { SimulationController } from './components/SimulationController';
 import { DashboardPage } from './pages/DashboardPage';
 import { OperationsPage } from './pages/OperationsPage';
 import { CustomersPage } from './pages/CustomersPage';
@@ -46,7 +47,88 @@ export default function App() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('C10245');
   const [selectedCellId, setSelectedCellId] = useState<string>('CELL-TLM-034');
 
-  // Load headline KPIs from the backend (scored from the real dataset/model) on mount.
+  const handleRefreshAllData = async () => {
+    try {
+      const [overviewRes, cellsRes, incidentsRes] = await Promise.all([
+        fetch('/api/network/overview'),
+        fetch('/api/network/cells'),
+        fetch('/api/incidents')
+      ]);
+
+      if (overviewRes.ok) {
+        const overview = await overviewRes.json();
+        setSummary(prev => ({
+          ...prev,
+          networkHealth: overview.network_health_score,
+          networkAnomalies: overview.detected_anomalies,
+          revenueAtRiskDZD: overview.revenue_at_risk_dzd
+        }));
+      }
+
+      if (cellsRes.ok) {
+        const { cells: apiCells } = await cellsRes.json();
+        if (apiCells && apiCells.length > 0) {
+          const mappedCells: NetworkCell[] = apiCells.map((c: any) => ({
+            cellId: c.cellId,
+            siteId: c.siteId,
+            siteName: c.siteName,
+            wilaya: c.wilaya,
+            technology: c.technology,
+            frequencyBand: c.frequencyBand,
+            azimuthDeg: c.azimuthDeg,
+            status: c.status,
+            healthScore: c.healthScore,
+            users: c.currentTelemetry.connectedUsers,
+            latencyMs: c.currentTelemetry.latencyMs,
+            packetLossPct: c.currentTelemetry.packetLossPct,
+            trafficMbps: c.currentTelemetry.trafficMbps,
+            availabilityPct: c.currentTelemetry.availabilityPct,
+            activeAlarms: c.activeAlarms,
+            anomalyScore: c.status === 'anomaly' ? 84 : 12,
+            anomalyReason: c.status === 'anomaly' ? 'Surge in packet loss and latency above regional baseline' : undefined
+          }));
+          setCells(mappedCells);
+        }
+      }
+
+      if (incidentsRes.ok) {
+        const { incidents: apiIncidents } = await incidentsRes.json();
+        if (apiIncidents && apiIncidents.length > 0) {
+          const mappedIncidents: TelecomIncident[] = apiIncidents.map((inc: any) => ({
+            id: inc.incident_id,
+            title: inc.title,
+            priority: inc.priority === 'P1' ? 'P1-CRITICAL' : 'P2-HIGH',
+            status: inc.status === 'RESOLVED' ? 'RESOLVED' : inc.status === 'DISPATCHED' ? 'DISPATCHED_TO_ITSM' : 'INVESTIGATING',
+            cellId: inc.infrastructure.cellIds?.[0] || 'CELL-SAI-001',
+            siteId: inc.infrastructure.siteIds?.[0] || 'SITE-SAI-01',
+            siteName: 'Saïda Central Hub',
+            wilaya: inc.infrastructure.wilaya,
+            detectedAt: new Date(inc.detected_at).toLocaleTimeString(),
+            impactedSubscribers: inc.customer_impact.affected_customers,
+            vipAccountsCount: Math.round(inc.customer_impact.high_risk_customers * 0.1),
+            revenueAtRiskDZD: inc.business_impact.revenue_at_risk,
+            priorityScore: inc.business_impact.impact_score,
+            anomalyScore: 84,
+            rootCauseDiagnosis: inc.ai_analysis.assessment,
+            recommendedAction: inc.ai_analysis.recommended_action,
+            itsmTicket: inc.itsm_ticket ? {
+              platform: inc.itsm_ticket.system === 'ServiceNow' ? 'ServiceNow' : 'Jira Service Management',
+              externalTicketId: inc.itsm_ticket.ticket_id,
+              dispatchedAt: new Date(inc.itsm_ticket.created_at).toLocaleTimeString(),
+              syncStatus: 'SYNCHRONIZED',
+              payloadSummary: `Work order dispatched to ${inc.itsm_ticket.system}`,
+              assignedTeam: inc.itsm_ticket.assigned_group
+            } : undefined
+          }));
+          setIncidents(mappedIncidents);
+        }
+      }
+    } catch (e) {
+      console.warn('TelecomAI 2.0 backend polling notice:', e);
+    }
+  };
+
+  // Load headline KPIs from the backend on mount and sync 2.0 loop state
   useEffect(() => {
     getDashboardSummary()
       .then(setSummary)
@@ -54,7 +136,9 @@ export default function App() {
 
     getChurnBenchmark()
       .then(({ models }) => setChampionModel(models.find(m => m.isChampion) || models[0] || null))
-      .catch(() => {}); // Dashboard card just shows a loading state if this fails; not critical-path.
+      .catch(() => {});
+
+    handleRefreshAllData();
   }, []);
 
   // Navigate handler
@@ -106,6 +190,12 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* TelecomAI 2.0 Simulation & Operational Loop Controller */}
+        <SimulationController
+          onRefreshAll={handleRefreshAllData}
+          onNavigateToOperations={() => handleNavigate('operations')}
+        />
+
         {activePage === 'dashboard' && (
           <DashboardPage
             summary={summary}

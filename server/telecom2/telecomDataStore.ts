@@ -1,4 +1,4 @@
-import { Wilaya, Site, Cell, Customer2 } from './types';
+import { Wilaya, Site, Cell, Customer2, Incident2, CustomerExperienceIndex, SimulationState } from './types';
 
 // ==========================================
 // 1. WILAYAS (ALGERIAN REGIONS)
@@ -538,4 +538,772 @@ export const CUSTOMERS_DB: Customer2[] = [
     callsCount: 1200,
     rechargeFrequencyDays: 30,
   },
+  {
+    customerId: 'CUST-ALG-002',
+    name: 'Sofia Merabet',
+    wilaya: 'Algiers',
+    segment: 'Consumer Postpaid',
+    subscriptionType: 'Postpaid',
+    planName: 'Postpaid Smart 3000',
+    monthlySpendDZD: 3000,
+    tenureMonths: 19,
+    complaints: 0,
+    attachedCellId: 'CELL-ALG-002A',
+    fallbackCellId: 'CELL-ALG-002B',
+    baselineChurnRisk: 0.18,
+    dataUsageGB: 24.5,
+    callsCount: 310,
+    rechargeFrequencyDays: 30,
+  },
+  {
+    customerId: 'CUST-ORA-001',
+    name: 'Oran Port Terminal Logistics',
+    wilaya: 'Oran',
+    segment: 'Enterprise B2B',
+    subscriptionType: 'Postpaid',
+    planName: 'Enterprise Harbor 200GB',
+    monthlySpendDZD: 28000,
+    tenureMonths: 31,
+    complaints: 1,
+    attachedCellId: 'CELL-ORA-001A',
+    fallbackCellId: 'CELL-ORA-001B',
+    baselineChurnRisk: 0.22,
+    dataUsageGB: 180.0,
+    callsCount: 750,
+    rechargeFrequencyDays: 30,
+  },
+  {
+    customerId: 'CUST-TLM-001',
+    name: 'Universite Abou Bekr Belkaid',
+    wilaya: 'Tlemcen',
+    segment: 'VIP Priority',
+    subscriptionType: 'Postpaid',
+    planName: 'Campus Fiber Backup 100GB',
+    monthlySpendDZD: 16000,
+    tenureMonths: 24,
+    complaints: 1,
+    attachedCellId: 'CELL-TLM-001A',
+    fallbackCellId: 'CELL-TLM-001B',
+    baselineChurnRisk: 0.38,
+    dataUsageGB: 95.0,
+    callsCount: 410,
+    rechargeFrequencyDays: 30,
+  },
 ];
+
+// ==========================================
+// 5. STATEFUL STORES & INCIDENTS DATABASE
+// ==========================================
+
+// Deep clone helper
+function deepClone<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+let activeCells: Cell[] = deepClone(CELLS);
+let activeSites: Site[] = deepClone(SITES);
+
+let simulationState: SimulationState = {
+  isActive: true, // Initially Saïda has active degradation for demonstration
+  scenarioName: 'Saïda High-Plateaux Microwave Congestion',
+  targetWilaya: 'Saida',
+  degradedCellCount: 7,
+  simulatedIncidentId: 'INC-0001',
+  startedAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+  currentAnomalyCount: 7,
+};
+
+// Initial Incidents List
+let INCIDENTS_DB: Incident2[] = [
+  {
+    incident_id: 'INC-0001',
+    title: 'Regional Network Degradation - Saïda Transport Backhaul',
+    severity: 'HIGH',
+    priority: 'P1',
+    status: 'INVESTIGATING',
+    detected_at: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+    infrastructure: {
+      wilaya: 'Saida',
+      sites: 3,
+      cells: 7,
+      siteIds: ['SITE-SAI-001', 'SITE-SAI-002', 'SITE-SAI-003'],
+      cellIds: [
+        'CELL-SAI-001A',
+        'CELL-SAI-001B',
+        'CELL-SAI-002A',
+        'CELL-SAI-002B',
+        'CELL-SAI-002C',
+        'CELL-SAI-003A',
+        'CELL-SAI-003B',
+      ],
+    },
+    network_impact: {
+      latency_increase_pct: 38,
+      packet_loss_increase_pct: 12,
+    },
+    customer_impact: {
+      affected_customers: 1284,
+      high_risk_customers: 237,
+    },
+    business_impact: {
+      impact_score: 87,
+      revenue_at_risk: 12500,
+    },
+    ai_analysis: {
+      assessment:
+        'High-volume congestion and packet drop anomaly detected across 7 radio sectors in Saida. Transport microwave backhaul latency elevated by 38% above nominal baseline (avg 29.2ms vs 21.1ms baseline) with a 12% packet loss elevation. Aggregate blast radius affects 1,284 subscribers (237 high churn risk) with 12,500 DZD monthly revenue exposure.',
+      recommended_action:
+        'Execute automated microwave link carrier failover to protection path on Site SITE-SAI-001. Adjust Remote Electrical Tilt (RET) by +2° down-tilt on sectors CELL-SAI-001A, CELL-SAI-001B, CELL-SAI-002A to offload traffic to adjacent micro-cells. Dispatch proactive SMS notification and credit 5GB goodwill data bonus to 237 vulnerable high-risk subscribers.',
+      confidence: 0.84,
+    },
+    evidence: {
+      detected_at: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+      root_cause_indicators: [
+        'Microwave link RSSI drop of -14 dBm detected on backhaul hop SITE-SAI-001 -> SITE-SAI-003',
+        'PRB utilization pegged at 88% on sector carrier B3',
+        'Elevation in RRC Connection Re-establishment failures (+42%) on 4G-LTE cells',
+      ],
+      telemetry_deltas: {
+        latency_baseline_ms: 21.1,
+        latency_current_ms: 29.2,
+        latency_increase_pct: 38,
+        packet_loss_baseline_pct: 0.29,
+        packet_loss_current_pct: 3.56,
+        packet_loss_increase_pct: 12,
+      },
+    },
+    itsm_ticket: {
+      ticket_id: 'INC-SNOW-89421',
+      system: 'ServiceNow',
+      dispatched_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+      status: 'ASSIGNED',
+    },
+  },
+  {
+    incident_id: 'INC-0002',
+    title: 'Minor Feeder Cable Drift - Tlemcen Mansourah Sector A',
+    severity: 'LOW',
+    priority: 'P3',
+    status: 'INVESTIGATING',
+    detected_at: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
+    infrastructure: {
+      wilaya: 'Tlemcen',
+      sites: 1,
+      cells: 1,
+      siteIds: ['SITE-TLM-001'],
+      cellIds: ['CELL-TLM-001A'],
+    },
+    network_impact: {
+      latency_increase_pct: 14,
+      packet_loss_increase_pct: 3,
+    },
+    customer_impact: {
+      affected_customers: 240,
+      high_risk_customers: 28,
+    },
+    business_impact: {
+      impact_score: 34,
+      revenue_at_risk: 2800,
+    },
+    ai_analysis: {
+      assessment:
+        'VSWR RF antenna return loss elevated by 1.2 dB on Mansourah sector A. Localized packet discard observed without regional backhaul impact.',
+      recommended_action:
+        'Schedule preventative RF jumper connector replacement on SITE-TLM-001 during standard off-peak maintenance window.',
+      confidence: 0.91,
+    },
+    evidence: {
+      detected_at: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
+      root_cause_indicators: ['RF return loss VSWR 1.38 (threshold 1.25)'],
+      telemetry_deltas: {
+        latency_baseline_ms: 22.0,
+        latency_current_ms: 25.1,
+        latency_increase_pct: 14,
+        packet_loss_baseline_pct: 0.35,
+        packet_loss_current_pct: 1.05,
+        packet_loss_increase_pct: 3,
+      },
+    },
+  },
+];
+
+// ==========================================
+// 6. HEALTH & CXS CALCULATION LOGIC
+// ==========================================
+
+/**
+ * Transparent TelecomAI Prototype Network Health Calculation (0 - 100)
+ * Evaluates deviation from nominal baseline across Latency, Packet Loss, Availability, and PRB Load.
+ */
+export function calculateCellHealthScore(cell: Cell): number {
+  const current = cell.currentTelemetry;
+  const baseline = cell.nominalBaseline;
+
+  // Latency penalty: 0.5 point per 1% increase over baseline (capped at 30)
+  const latDeltaPct = Math.max(0, ((current.latencyMs - baseline.latencyMs) / baseline.latencyMs) * 100);
+  const latPenalty = Math.min(30, latDeltaPct * 0.4);
+
+  // Packet loss penalty: 6 points per 1% absolute packet loss (capped at 35)
+  const lossPenalty = Math.min(35, current.packetLossPct * 6.5);
+
+  // Availability penalty: 5 points per 1% below 99.5% (capped at 25)
+  const availDeficit = Math.max(0, 99.5 - current.availabilityPct);
+  const availPenalty = Math.min(25, availDeficit * 4.5);
+
+  // PRB congestion penalty: 1 point per 1% over 75% load (capped at 15)
+  const prbExcess = Math.max(0, current.prbUtilizationPct - 75);
+  const prbPenalty = Math.min(15, prbExcess * 0.8);
+
+  const rawScore = 100 - (latPenalty + lossPenalty + availPenalty + prbPenalty);
+  return Math.max(0, Math.min(100, Math.round(rawScore)));
+}
+
+/**
+ * Customer Experience Index (CEI / CXS) (0 - 100)
+ * Weighted synthesis of:
+ * - Network QoE (35%)
+ * - Billing & Care (30%)
+ * - Usage Stability (20%)
+ * - Tenure & Loyalty (15%)
+ */
+export function calculateCustomerExperienceIndex(
+  customer: Customer2,
+  servingCell?: Cell
+): CustomerExperienceIndex & { riskFactors: string[]; shapAttribution: Record<string, number> } {
+  // 1. Network QoE (0 - 100)
+  let cellHealth = 95;
+  if (servingCell) {
+    cellHealth = calculateCellHealthScore(servingCell);
+  }
+  const networkQoE = cellHealth;
+
+  // 2. Billing & Care (0 - 100)
+  // Penalized by unresolved complaints: 20 pts per complaint
+  const billingCare = Math.max(10, Math.round(100 - customer.complaints * 22));
+
+  // 3. Usage Stability (0 - 100)
+  // High data usage and active calls reflect healthy adoption
+  const usageStability = Math.min(100, Math.round(Math.min(50, customer.dataUsageGB * 1.5) + Math.min(50, customer.callsCount / 10)));
+
+  // 4. Tenure & Loyalty (0 - 100)
+  const tenureLoyalty = Math.min(100, Math.round(customer.tenureMonths * 2.8));
+
+  // Composite Score
+  const score = Math.round(
+    0.35 * networkQoE +
+    0.30 * billingCare +
+    0.20 * usageStability +
+    0.15 * tenureLoyalty
+  );
+
+  let band: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR' = 'EXCELLENT';
+  if (score < 50) band = 'POOR';
+  else if (score < 70) band = 'FAIR';
+  else if (score < 85) band = 'GOOD';
+
+  const riskFactors: string[] = [];
+  if (servingCell && servingCell.status === 'anomaly') {
+    riskFactors.push(`Attached to degraded sector ${servingCell.cellId} (${servingCell.wilaya})`);
+  }
+  if (customer.complaints >= 2) {
+    riskFactors.push(`${customer.complaints} repeat customer care complaints logged`);
+  }
+  if (customer.tenureMonths < 12) {
+    riskFactors.push(`New subscriber tenure (< 12 months)`);
+  }
+  if (customer.monthlySpendDZD > 10000) {
+    riskFactors.push(`High ARPU Tier (${customer.monthlySpendDZD.toLocaleString()} DZD/mo)`);
+  }
+
+  // SHAP Attribution Simulation for explainability
+  const shapAttribution = {
+    'Network Degradation': servingCell?.status === 'anomaly' ? 0.32 : -0.15,
+    'Repeat Complaints': customer.complaints * 0.12,
+    'High Monthly Spend': customer.monthlySpendDZD > 5000 ? 0.08 : -0.05,
+    'Contract Tenure': customer.tenureMonths > 24 ? -0.22 : 0.14,
+    'Data Usage Consistency': customer.dataUsageGB > 30 ? -0.11 : 0.09,
+  };
+
+  return {
+    score,
+    band,
+    breakdown: {
+      networkQoE,
+      billingCare,
+      usageStability,
+      tenureLoyalty,
+    },
+    riskFactors,
+    shapAttribution,
+  };
+}
+
+// ==========================================
+// 7. PUBLIC SERVICE METHODS
+// ==========================================
+
+export function getNetworkOverview() {
+  const allCells = activeCells;
+  const anomalousCells = allCells.filter(c => c.status === 'anomaly');
+  const warningCells = allCells.filter(c => c.status === 'warning');
+
+  // Network health score: average cell health across all cells
+  const sumHealth = allCells.reduce((acc, c) => acc + calculateCellHealthScore(c), 0);
+  const avgHealth = Math.round(sumHealth / Math.max(1, allCells.length));
+
+  // Calculate affected and high-risk subscribers
+  const anomalousCellIds = anomalousCells.map(c => c.cellId);
+  const affectedSubs = CUSTOMERS_DB.filter(
+    c => anomalousCellIds.includes(c.attachedCellId) || (c.fallbackCellId && anomalousCellIds.includes(c.fallbackCellId))
+  );
+
+  const highRiskSubs = affectedSubs.filter(c => c.baselineChurnRisk >= 0.65 || c.complaints >= 2);
+
+  // Derive total physical blast radius
+  const totalConnectedUsersInAnomalous = anomalousCells.reduce((sum, c) => sum + c.currentTelemetry.users, 0);
+  const affectedCustomersCount = totalConnectedUsersInAnomalous > 0 ? totalConnectedUsersInAnomalous : 1284;
+  const highRiskCustomersCount = Math.round(affectedCustomersCount * (237 / 1284));
+
+  // Regional breakdown
+  const regionalBreakdown = WILAYAS.map(w => {
+    const wilayaCells = allCells.filter(c => c.wilaya.toLowerCase() === w.name.toLowerCase());
+    const wilayaAnomalies = wilayaCells.filter(c => c.status === 'anomaly').length;
+    const wilayaHealth = wilayaCells.length > 0
+      ? Math.round(wilayaCells.reduce((acc, c) => acc + calculateCellHealthScore(c), 0) / wilayaCells.length)
+      : 98;
+
+    return {
+      wilaya: w.name,
+      code: w.code,
+      region: w.region,
+      sites: w.siteCount,
+      cells: wilayaCells.length,
+      anomalies: wilayaAnomalies,
+      healthScore: wilayaHealth,
+      status: wilayaAnomalies > 0 ? 'ANOMALY' : wilayaHealth < 80 ? 'WARNING' : 'HEALTHY',
+    };
+  });
+
+  return {
+    network_health_score: avgHealth,
+    active_sites: activeSites.length,
+    active_cells: allCells.length,
+    detected_anomalies: anomalousCells.length,
+    warning_cells: warningCells.length,
+    affected_customers: affectedCustomersCount,
+    high_risk_customers: highRiskCustomersCount,
+    revenue_at_risk_dzd: 12500,
+    open_incidents_count: INCIDENTS_DB.filter(i => i.status !== 'RESOLVED').length,
+    regional_breakdown: regionalBreakdown,
+    synthetic_disclaimer: 'Synthetic telecom environment — illustrative data, not real operator statistics.',
+    last_updated: new Date().toISOString(),
+  };
+}
+
+export function getCells(filters?: { wilaya?: string; status?: string; siteId?: string }) {
+  let list = activeCells.map(c => ({
+    ...c,
+    healthScore: calculateCellHealthScore(c),
+  }));
+
+  if (filters?.wilaya) {
+    const wLower = filters.wilaya.toLowerCase();
+    list = list.filter(c => c.wilaya.toLowerCase() === wLower);
+  }
+  if (filters?.status) {
+    const sLower = filters.status.toLowerCase();
+    list = list.filter(c => c.status.toLowerCase() === sLower);
+  }
+  if (filters?.siteId) {
+    list = list.filter(c => c.siteId === filters.siteId);
+  }
+
+  return list;
+}
+
+export function getCellById(cellId: string) {
+  const cell = activeCells.find(c => c.cellId.toUpperCase() === cellId.toUpperCase());
+  if (!cell) return null;
+
+  const healthScore = calculateCellHealthScore(cell);
+  const attachedCustomers = CUSTOMERS_DB.filter(
+    c => c.attachedCellId === cell.cellId || c.fallbackCellId === cell.cellId
+  ).map(c => {
+    const exp = calculateCustomerExperienceIndex(c, cell);
+    return {
+      ...c,
+      experienceScore: exp.score,
+      experienceBand: exp.band,
+    };
+  });
+
+  const relatedIncidents = INCIDENTS_DB.filter(i => i.infrastructure.cellIds.includes(cell.cellId));
+
+  return {
+    cell: {
+      ...cell,
+      healthScore,
+    },
+    nominalBaseline: cell.nominalBaseline,
+    currentTelemetry: cell.currentTelemetry,
+    healthScore,
+    attachedCustomers,
+    relatedIncidents,
+    synthetic_disclaimer: 'Synthetic telecom environment — illustrative data, not real operator statistics.',
+  };
+}
+
+export function getCustomers(filters?: { wilaya?: string; highRisk?: boolean; cellId?: string }) {
+  const cellMap = new Map<string, Cell>();
+  activeCells.forEach(c => cellMap.set(c.cellId, c));
+
+  let list = CUSTOMERS_DB.map(cust => {
+    const servingCell = cellMap.get(cust.attachedCellId);
+    const exp = calculateCustomerExperienceIndex(cust, servingCell);
+
+    // Adjusted churn risk under active degradation
+    let exposedChurnRisk = cust.baselineChurnRisk;
+    if (servingCell && servingCell.status === 'anomaly') {
+      exposedChurnRisk = Math.min(0.98, cust.baselineChurnRisk + 0.15);
+    }
+
+    return {
+      customerId: cust.customerId,
+      name: cust.name,
+      wilaya: cust.wilaya,
+      segment: cust.segment,
+      subscriptionType: cust.subscriptionType,
+      planName: cust.planName,
+      monthlySpendDZD: cust.monthlySpendDZD,
+      tenureMonths: cust.tenureMonths,
+      complaints: cust.complaints,
+      attachedCellId: cust.attachedCellId,
+      experienceScore: exp.score,
+      experienceBand: exp.band,
+      churnRisk: Number(exposedChurnRisk.toFixed(2)),
+      networkExposure: servingCell ? servingCell.status : 'normal',
+      isHighRisk: exposedChurnRisk >= 0.65 || cust.complaints >= 2,
+    };
+  });
+
+  if (filters?.wilaya) {
+    const wLower = filters.wilaya.toLowerCase();
+    list = list.filter(c => c.wilaya.toLowerCase() === wLower);
+  }
+  if (filters?.cellId) {
+    list = list.filter(c => c.attachedCellId === filters.cellId);
+  }
+  if (filters?.highRisk !== undefined) {
+    list = list.filter(c => c.isHighRisk === filters.highRisk);
+  }
+
+  return list;
+}
+
+export function getCustomerById(customerId: string) {
+  const customer = CUSTOMERS_DB.find(c => c.customerId.toUpperCase() === customerId.toUpperCase());
+  if (!customer) return null;
+
+  const servingCell = activeCells.find(c => c.cellId === customer.attachedCellId);
+  const fallbackCell = customer.fallbackCellId ? activeCells.find(c => c.cellId === customer.fallbackCellId) : null;
+  const exp = calculateCustomerExperienceIndex(customer, servingCell);
+
+  let exposedChurnRisk = customer.baselineChurnRisk;
+  if (servingCell && servingCell.status === 'anomaly') {
+    exposedChurnRisk = Math.min(0.98, customer.baselineChurnRisk + 0.15);
+  }
+
+  return {
+    customer: {
+      ...customer,
+      churnRisk: Number(exposedChurnRisk.toFixed(2)),
+      isHighRisk: exposedChurnRisk >= 0.65 || customer.complaints >= 2,
+    },
+    servingCell: servingCell ? {
+      ...servingCell,
+      healthScore: calculateCellHealthScore(servingCell),
+    } : null,
+    fallbackCell: fallbackCell ? {
+      ...fallbackCell,
+      healthScore: calculateCellHealthScore(fallbackCell),
+    } : null,
+    experience: exp,
+    synthetic_disclaimer: 'Synthetic telecom environment — illustrative data, not real operator statistics.',
+  };
+}
+
+export function getCustomerExperience(customerId: string) {
+  const customer = CUSTOMERS_DB.find(c => c.customerId.toUpperCase() === customerId.toUpperCase());
+  if (!customer) return null;
+
+  const servingCell = activeCells.find(c => c.cellId === customer.attachedCellId);
+  return {
+    customerId: customer.customerId,
+    customerName: customer.name,
+    experience: calculateCustomerExperienceIndex(customer, servingCell),
+    synthetic_disclaimer: 'Synthetic telecom environment — illustrative data, not real operator statistics.',
+  };
+}
+
+export function getImpactSummary() {
+  const anomalousCells = activeCells.filter(c => c.status === 'anomaly');
+  const anomalousIds = anomalousCells.map(c => c.cellId);
+
+  const affectedCustomers = CUSTOMERS_DB.filter(
+    c => anomalousIds.includes(c.attachedCellId) || (c.fallbackCellId && anomalousIds.includes(c.fallbackCellId))
+  );
+
+  const highRiskCustomers = affectedCustomers.filter(c => c.baselineChurnRisk >= 0.65 || c.complaints >= 2);
+
+  return {
+    total_affected_cells: anomalousCells.length,
+    total_affected_sites: new Set(anomalousCells.map(c => c.siteId)).size,
+    total_affected_customers: 1284,
+    total_high_risk_customers: 237,
+    total_revenue_at_risk_dzd: 12500,
+    impact_score: 87,
+    cluster_hotspot: {
+      wilaya: 'Saida',
+      primary_cause: 'Microwave Backhaul Congestion',
+      active_incidents: ['INC-0001'],
+    },
+    synthetic_disclaimer: 'Synthetic telecom environment — illustrative data, not real operator statistics.',
+  };
+}
+
+export function getIncidents() {
+  return INCIDENTS_DB;
+}
+
+export function getIncidentById(incidentId: string) {
+  const inc = INCIDENTS_DB.find(i => i.incident_id.toUpperCase() === incidentId.toUpperCase());
+  return inc || null;
+}
+
+export function createIncident(data: Partial<Incident2>): Incident2 {
+  const count = INCIDENTS_DB.length + 1;
+  const newId = `INC-${String(count).padStart(4, '0')}`;
+
+  const newInc: Incident2 = {
+    incident_id: data.incident_id || newId,
+    title: data.title || 'Reported Network Degradation',
+    severity: data.severity || 'MEDIUM',
+    priority: data.priority || 'P2',
+    status: data.status || 'NEW',
+    detected_at: data.detected_at || new Date().toISOString(),
+    infrastructure: data.infrastructure || {
+      wilaya: 'Saida',
+      sites: 1,
+      cells: 1,
+      siteIds: ['SITE-SAI-001'],
+      cellIds: ['CELL-SAI-001A'],
+    },
+    network_impact: data.network_impact || {
+      latency_increase_pct: 25,
+      packet_loss_increase_pct: 6,
+    },
+    customer_impact: data.customer_impact || {
+      affected_customers: 450,
+      high_risk_customers: 65,
+    },
+    business_impact: data.business_impact || {
+      impact_score: 60,
+      revenue_at_risk: 5400,
+    },
+    ai_analysis: data.ai_analysis || {
+      assessment: 'Operational incident created and tracked in TelecomAI 2.0 Incident Intelligence engine.',
+      recommended_action: 'Dispatch tier-1 engineering diagnosis and verify microwave carrier telemetry.',
+      confidence: 0.85,
+    },
+    evidence: data.evidence,
+  };
+
+  INCIDENTS_DB.unshift(newInc);
+  return newInc;
+}
+
+export function updateIncident(incidentId: string, updates: Partial<Incident2>): Incident2 | null {
+  const index = INCIDENTS_DB.findIndex(i => i.incident_id.toUpperCase() === incidentId.toUpperCase());
+  if (index === -1) return null;
+
+  INCIDENTS_DB[index] = {
+    ...INCIDENTS_DB[index],
+    ...updates,
+  };
+
+  return INCIDENTS_DB[index];
+}
+
+// ==========================================
+// 8. SIMULATION ENGINE WORKFLOW
+// ==========================================
+
+export function simulateDegradation(wilaya: string = 'Saida'): { status: string; simulation: SimulationState } {
+  // Degrade all cells in target wilaya
+  activeCells = activeCells.map(c => {
+    if (c.wilaya.toLowerCase() === wilaya.toLowerCase()) {
+      return {
+        ...c,
+        status: 'anomaly' as const,
+        currentTelemetry: {
+          ...c.currentTelemetry,
+          latencyMs: Number((c.nominalBaseline.latencyMs * 1.38).toFixed(1)),
+          packetLossPct: Number((c.nominalBaseline.packetLossPct + 3.4).toFixed(1)),
+          availabilityPct: 93.8,
+          prbUtilizationPct: 88.5,
+        },
+      };
+    }
+    return c;
+  });
+
+  // Degrade sites in target wilaya
+  activeSites = activeSites.map(s => {
+    if (s.wilaya.toLowerCase() === wilaya.toLowerCase()) {
+      return {
+        ...s,
+        status: 'anomaly' as const,
+        healthScore: 58,
+      };
+    }
+    return s;
+  });
+
+  // Re-open INC-0001 if closed
+  const inc0001 = INCIDENTS_DB.find(i => i.incident_id === 'INC-0001');
+  if (inc0001) {
+    inc0001.status = 'INVESTIGATING';
+  }
+
+  simulationState = {
+    isActive: true,
+    scenarioName: `${wilaya} Transport Backhaul Congestion`,
+    targetWilaya: wilaya,
+    degradedCellCount: activeCells.filter(c => c.wilaya.toLowerCase() === wilaya.toLowerCase()).length,
+    simulatedIncidentId: 'INC-0001',
+    startedAt: new Date().toISOString(),
+    currentAnomalyCount: activeCells.filter(c => c.status === 'anomaly').length,
+  };
+
+  return {
+    status: 'Degradation simulation initiated successfully',
+    simulation: simulationState,
+  };
+}
+
+export function resetSimulation(): { status: string; simulation: SimulationState } {
+  // Restore cells to nominal
+  activeCells = deepClone(CELLS).map(c => ({
+    ...c,
+    status: 'normal' as const,
+    currentTelemetry: {
+      ...c.currentTelemetry,
+      latencyMs: c.nominalBaseline.latencyMs,
+      packetLossPct: c.nominalBaseline.packetLossPct,
+      availabilityPct: c.nominalBaseline.availabilityPct,
+      prbUtilizationPct: c.nominalBaseline.prbUtilizationPct,
+    },
+  }));
+
+  activeSites = deepClone(SITES).map(s => ({
+    ...s,
+    status: 'normal' as const,
+    healthScore: 98,
+  }));
+
+  // Mark INC-0001 as resolved
+  const inc0001 = INCIDENTS_DB.find(i => i.incident_id === 'INC-0001');
+  if (inc0001) {
+    inc0001.status = 'RESOLVED';
+  }
+
+  simulationState = {
+    isActive: false,
+    scenarioName: 'Nominal Operations',
+    targetWilaya: 'None',
+    degradedCellCount: 0,
+    simulatedIncidentId: '',
+    startedAt: null,
+    currentAnomalyCount: 0,
+  };
+
+  return {
+    status: 'Simulation reset: All network cells restored to nominal baseline',
+    simulation: simulationState,
+  };
+}
+
+export function getSimulationStatus(): SimulationState {
+  return simulationState;
+}
+
+// ==========================================
+// 9. MODEL PERFORMANCE SPECS
+// ==========================================
+
+export function getModelPerformanceSpecs() {
+  return {
+    models: [
+      {
+        modelName: 'Gradient Boosting Classifier',
+        task: 'Customer Churn Risk Prediction & Retention Advisory',
+        role: 'Champion Production Model',
+        isChampion: true,
+        metrics: {
+          rocAuc: 0.961,
+          f1Score: 0.741,
+          precision: 0.766,
+          recall: 0.718,
+          accuracy: 0.892,
+        },
+        features: [
+          'Monthly Spend DZD (ARPU)',
+          'Data Usage GB & Quota Depletion Rate',
+          'Tenure in Months',
+          'Customer Care Repeat Complaints',
+          'Voice Call Volume',
+          'Network Exposure (Cell Latency / Packet Loss)',
+          'Recharge Frequency Days',
+          'Subscription Tier (Prepaid / Postpaid / VIP / B2B)',
+        ],
+        methodology:
+          'Trained under 5-fold stratified cross-validation on synthetic behavioral telecom subscriber dataset. Local explainability provided via SHAP TreeExplainer attributions.',
+        limitations:
+          'Evaluated on synthetic subscriber distribution. Live operator deployments require calibration against billing records and local market retention patterns.',
+      },
+      {
+        modelName: 'Unsupervised Isolation Forest',
+        task: 'Cellular Radio Access Network (RAN) Anomaly Detection',
+        role: 'Real-time Telemetry Ingestion',
+        isChampion: false,
+        metrics: {
+          contaminationRate: 0.05,
+          f1Score: 0.88,
+          precision: 0.86,
+          recall: 0.90,
+          decisionThreshold: -0.12,
+        },
+        features: [
+          'Transport RTT Latency (ms)',
+          'Packet Loss Ratio (%)',
+          'Throughput Deviation (Mbps)',
+          'Carrier Availability Index (%)',
+          'Active Connected UEs',
+          'PRB Resource Block Utilization (%)',
+        ],
+        methodology:
+          'Unsupervised partitioning trees isolating anomalous multi-dimensional telemetry vectors without relying on ground-truth labels during training.',
+        limitations:
+          'Baseline drift during major sporting or cultural events requires dynamic baseline adjustment to avoid false positives.',
+      },
+    ],
+    benchmarkComparison: [
+      { name: 'Gradient Boosting', rocAuc: 0.961, f1: 0.741, precision: 0.766, recall: 0.718 },
+      { name: 'Random Forest', rocAuc: 0.948, f1: 0.722, precision: 0.745, recall: 0.701 },
+      { name: 'Logistic Regression', rocAuc: 0.832, f1: 0.612, precision: 0.635, recall: 0.591 },
+      { name: 'Decision Tree', rocAuc: 0.815, f1: 0.589, precision: 0.602, recall: 0.578 },
+    ],
+    synthetic_disclaimer: 'Synthetic telecom environment — illustrative data, not real operator statistics.',
+  };
+}
+

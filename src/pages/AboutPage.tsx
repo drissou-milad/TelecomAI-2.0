@@ -107,40 +107,48 @@ export const AboutPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. System Architecture */}
+      {/* 2. System Architecture: 1.0 Foundation to 2.0 Autonomous Loop */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-6 space-y-4">
-        <div className="flex items-center gap-2 text-cyan-400">
-          <Layers className="w-5 h-5" />
-          <h2 className="text-lg font-bold text-white">2. MVP System Architecture</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-cyan-400">
+            <Layers className="w-5 h-5" />
+            <h2 className="text-lg font-bold text-white">2. TelecomAI 2.0 Operational Intelligence Architecture</h2>
+          </div>
+          <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold">
+            CLOSED-LOOP AUTONOMY
+          </span>
         </div>
 
-        <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-300 overflow-x-auto leading-loose">
+        <p className="text-xs text-slate-300 leading-relaxed">
+          The transformation from <strong>TelecomAI 1.0</strong> (prediction model ➔ static dashboard) to <strong>TelecomAI 2.0</strong> (operational intelligence ➔ automated ITSM dispatch) introduces real-time cross-correlation between physical radio telemetry, subscriber experience degradation, business revenue at risk, and actionable remediation work orders.
+        </p>
+
+        <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-300 overflow-x-auto leading-relaxed">
           <pre className="text-cyan-300">
-{`                     TELECOMAI ARCHITECTURE
-                                │
-                ┌───────────────────────┐
-                │                       │
-  Customer CRM Data       Radio Network KPIs
-   (Spend, Complaints,    (Latency, Packet Loss,
-    Tenure, Recharges)     PRB Users, Availability)
-        │                       │
-        ▼                       ▼
-  Gradient Boosting        Isolation Forest
-  (Precision: 0.766)        (Contamination: 3.7%)
-        │                       │
-        └───────────────┬───────┘
-                        ▼
-               FastAPI Backend / REST API
-        (/api/predict/churn, /api/predict/anomaly,
-         /api/churn/benchmark, /api/anomaly/specs,
-                /api/dashboard/summary)
-                        │
-                        ▼
-              React + Vite + Tailwind NOC UI
-         (Executive Dashboard, Churn 360, Cell NOC)
-                        │
-                        ▼
-             Production NOC / Recruiter Demo`}
+{`                    TELECOMAI 2.0 OPERATIONAL INTELLIGENCE LOOP
+
+  1. Network Telemetry   ──▶   PRB utilization, Latency, Loss, Availability (Wilaya ➔ Site ➔ Cell)
+            │
+            ▼
+  2. Anomaly Detection   ──▶   Isolation Forest / 3GPP Threshold Outliers (Latency +38%, Loss +12%)
+            │
+            ▼
+  3. Spatial Correlation ──▶   Topological Mapping: Degraded Cells mapped to Connected Subscribers
+            │
+            ▼
+  4. Customer Impact     ──▶   Blast Radius (1,284 affected, 237 high-risk churn candidates)
+            │
+            ▼
+  5. Business Impact     ──▶   Revenue Exposure (12,500 DZD) & Priority Scoring (Impact Score: 87)
+            │
+            ▼
+  6. Incident Engine     ──▶   Dynamic Priority Assignment (P1-Critical) with Deduplication
+            │
+            ▼
+  7. AI Ops Assessment   ──▶   6-Question Synthesis: What, Why, Who, Evidence, Next Steps, Confidence
+            │
+            ▼
+  8. Enterprise ITSM     ──▶   ITSM Connector Dispatches Work Orders (ServiceNow / Jira Service Mgmt)`}
           </pre>
         </div>
       </div>
