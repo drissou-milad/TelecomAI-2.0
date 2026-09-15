@@ -1520,14 +1520,17 @@ export function simulateScenario(req: ScenarioRequest): { status: string; simula
     currentAnomalyCount: activeCells.filter(c => c.status === 'anomaly').length,
   };
 
-  // Add the sequence of causal audit events
+  // Add the sequence of causal audit events matching closed-loop workflow
   addAuditEvent('SIMULATION_TRIGGERED', 'SCENARIO_CENTER', `Scenario launched: ${scenarioTitle} (${severity} severity)`, 'HIGH');
-  addAuditEvent('ANOMALY_DETECTED', `RAN-${wilaya.toUpperCase()}`, `Anomaly vector detected across ${wilaya} radio carrier sectors`, 'HIGH');
-  addAuditEvent('IMPACT_CALCULATED', 'BLAST_RADIUS', `Impact evaluated: 1,284 subscribers exposed, 12,500 DZD revenue at risk`, 'HIGH');
+  addAuditEvent('ANOMALY_DETECTED', `RAN-${wilaya.toUpperCase()}`, `Anomaly vector detected across ${wilaya} radio carrier sectors (+38% RTT, +12% Loss)`, 'HIGH');
+  addAuditEvent('CELL_IMPACT_CALCULATED', 'TOPOLOGY_ENGINE', `Topological clustering isolated 7 degraded sectors across 3 sites (Hub: SITE-${wilaya.slice(0, 3).toUpperCase()}-001)`, 'HIGH');
+  addAuditEvent('CUSTOMER_IMPACT_CALCULATED', 'BLAST_RADIUS', `Spatial join identified 1,284 affected subscribers (187 high churn risk)`, 'HIGH');
+  addAuditEvent('BUSINESS_IMPACT_CALCULATED', 'ARPU_EXPOSURE', `Revenue risk calculated at 12,500 DZD monthly exposure; priority score 88.5/100`, 'HIGH');
   addAuditEvent('INCIDENT_CREATED', 'INC-0001', `Operational incident registered: ${scenarioTitle}`, 'CRITICAL');
-  addAuditEvent('PRIORITY_ASSIGNED', 'INC-0001', `Assigned priority ${simulationState.severityLevel === 'CRITICAL' ? 'P1' : 'P2'} based on revenue & VIP weighting`, 'CRITICAL');
-  addAuditEvent('AI_ANALYSIS_COMPLETED', 'INC-0001', `Generated root-cause diagnosis and engineering mitigation playbook`, 'INFO');
-  addAuditEvent('RECOMMENDATION_GENERATED', 'PLAYBOOK', `Recommended: Dynamic carrier offload and automated link failover`, 'INFO');
+  addAuditEvent('PRIORITY_ASSIGNED', 'INC-0001', `Assigned priority ${simulationState.severityLevel === 'CRITICAL' ? 'P1-CRITICAL (60m SLA)' : 'P2-HIGH (240m SLA)'}`, 'CRITICAL');
+  addAuditEvent('AI_ANALYSIS_COMPLETED', 'INC-0001', `6-Question root cause brief compiled with 84% confidence`, 'INFO');
+  addAuditEvent('RECOMMENDATION_GENERATED', 'PLAYBOOK', `Recommended: Dynamic carrier failover to 2600MHz & Tier-2 technician dispatch`, 'INFO');
+  addAuditEvent('ITSM_WORK_ORDER_CREATED', 'INC-SNOW-89421', `ServiceNow work order created and synchronized with RAN Engineering Tier 2`, 'INFO');
 
   return {
     status: `Scenario '${scenarioTitle}' initiated successfully`,
@@ -1543,9 +1546,25 @@ export function getIncidentAnalytics(): IncidentAnalytics {
   const openCount = INCIDENTS_DB.filter(i => i.status !== 'RESOLVED').length;
 
   return {
-    totalIncidents: 14,
+    totalIncidents: 27,
     openIncidents: openCount,
-    resolvedIncidents: 14 - openCount,
+    resolvedIncidents: 27 - openCount,
+    incidentsThisWeek: 27,
+    p1Incidents: 4,
+    p2Incidents: 9,
+    customersAffected: 8421,
+    revenueRiskDZD: 142000,
+    topAffectedSites: [
+      { siteId: 'SA-042', siteName: 'Saïda Central Hub', wilaya: 'Saïda', count: 7, healthScore: 54 },
+      { siteId: 'OR-017', siteName: 'Oran Marina Port', wilaya: 'Oran', count: 5, healthScore: 68 },
+      { siteId: 'ALG-103', siteName: 'Algiers Didouche', wilaya: 'Algiers', count: 4, healthScore: 72 },
+    ],
+    topIncidentTypes: [
+      { type: 'Congestion', count: 11, pctOfTotal: 41 },
+      { type: 'Packet Loss', count: 7, pctOfTotal: 26 },
+      { type: 'Latency', count: 5, pctOfTotal: 19 },
+      { type: 'Availability', count: 4, pctOfTotal: 14 },
+    ],
     mttrMinutes: {
       overall: 58,
       p1: 42,
@@ -1554,44 +1573,44 @@ export function getIncidentAnalytics(): IncidentAnalytics {
       p4: 480,
     },
     severityDistribution: {
-      p1: INCIDENTS_DB.filter(i => i.priority === 'P1').length,
-      p2: INCIDENTS_DB.filter(i => i.priority === 'P2').length + 2,
-      p3: INCIDENTS_DB.filter(i => i.priority === 'P3').length + 4,
-      p4: 2,
+      p1: 4,
+      p2: 9,
+      p3: 11,
+      p4: 3,
     },
     dailyTrend: [
-      { date: '2026-09-09', day: 'Wed', incidents: 1, affectedCustomers: 320, revenueRiskDZD: 3100 },
-      { date: '2026-09-10', day: 'Thu', incidents: 2, affectedCustomers: 540, revenueRiskDZD: 5200 },
-      { date: '2026-09-11', day: 'Fri', incidents: 1, affectedCustomers: 180, revenueRiskDZD: 1900 },
-      { date: '2026-09-12', day: 'Sat', incidents: 3, affectedCustomers: 890, revenueRiskDZD: 8400 },
-      { date: '2026-09-13', day: 'Sun', incidents: 2, affectedCustomers: 620, revenueRiskDZD: 6100 },
-      { date: '2026-09-14', day: 'Mon', incidents: 2, affectedCustomers: 710, revenueRiskDZD: 7200 },
-      { date: '2026-09-15', day: 'Tue', incidents: openCount + 1, affectedCustomers: 1284, revenueRiskDZD: 12500 },
+      { date: '2026-09-09', day: 'Wed', incidents: 3, affectedCustomers: 1220, revenueRiskDZD: 19100 },
+      { date: '2026-09-10', day: 'Thu', incidents: 4, affectedCustomers: 1540, revenueRiskDZD: 25200 },
+      { date: '2026-09-11', day: 'Fri', incidents: 2, affectedCustomers: 880, revenueRiskDZD: 14900 },
+      { date: '2026-09-12', day: 'Sat', incidents: 5, affectedCustomers: 1890, revenueRiskDZD: 31400 },
+      { date: '2026-09-13', day: 'Sun', incidents: 4, affectedCustomers: 1420, revenueRiskDZD: 24100 },
+      { date: '2026-09-14', day: 'Mon', incidents: 4, affectedCustomers: 1310, revenueRiskDZD: 21200 },
+      { date: '2026-09-15', day: 'Tue', incidents: 5, affectedCustomers: 1284, revenueRiskDZD: 12500 },
     ],
     topProblematicSites: [
-      { siteId: 'SITE-SAI-001', siteName: 'Saïda Centre Ville', wilaya: 'Saida', incidentCount: 4, healthScore: 61 },
+      { siteId: 'SA-042', siteName: 'Saïda Central Hub', wilaya: 'Saïda', incidentCount: 7, healthScore: 54 },
+      { siteId: 'OR-017', siteName: 'Oran Marina Port', wilaya: 'Oran', incidentCount: 5, healthScore: 68 },
+      { siteId: 'ALG-103', siteName: 'Algiers Didouche', wilaya: 'Algiers', incidentCount: 4, healthScore: 72 },
       { siteId: 'SITE-TLM-001', siteName: 'Mansourah Central', wilaya: 'Tlemcen', incidentCount: 3, healthScore: 78 },
-      { siteId: 'SITE-ORA-001', siteName: 'Akid Lotfi Marina', wilaya: 'Oran', incidentCount: 2, healthScore: 92 },
-      { siteId: 'SITE-SAI-003', siteName: 'El Hassasna Backhaul Hub', wilaya: 'Saida', incidentCount: 2, healthScore: 64 },
     ],
     topProblematicCells: [
-      { cellId: 'CELL-SAI-001A', siteName: 'Saïda Centre Ville', wilaya: 'Saida', anomalyFrequency: 5, lastIncident: 'INC-0001' },
-      { cellId: 'CELL-SAI-002A', siteName: 'Saïda Nord Ind Zone', wilaya: 'Saida', anomalyFrequency: 3, lastIncident: 'INC-0001' },
+      { cellId: 'CELL-SAI-001A', siteName: 'Saïda Centre Ville', wilaya: 'Saïda', anomalyFrequency: 5, lastIncident: 'INC-0001' },
+      { cellId: 'CELL-SAI-002A', siteName: 'Saïda Nord Ind Zone', wilaya: 'Saïda', anomalyFrequency: 3, lastIncident: 'INC-0001' },
       { cellId: 'CELL-TLM-001A', siteName: 'Mansourah Central', wilaya: 'Tlemcen', anomalyFrequency: 3, lastIncident: 'INC-0002' },
       { cellId: 'CELL-ORA-001A', siteName: 'Akid Lotfi Marina', wilaya: 'Oran', anomalyFrequency: 2, lastIncident: 'INC-0003' },
     ],
     incidentsByWilaya: [
-      { wilaya: 'Saida', count: 5, p1Count: 2, status: 'ELEVATED' },
+      { wilaya: 'Saida', count: 7, p1Count: 2, status: 'ELEVATED' },
+      { wilaya: 'Oran', count: 5, p1Count: 1, status: 'MONITORED' },
+      { wilaya: 'Algiers', count: 4, p1Count: 1, status: 'MONITORED' },
       { wilaya: 'Tlemcen', count: 3, p1Count: 0, status: 'MODERATE' },
-      { wilaya: 'Oran', count: 3, p1Count: 1, status: 'MONITORED' },
-      { wilaya: 'Algiers', count: 2, p1Count: 0, status: 'STABLE' },
-      { wilaya: 'Constantine', count: 1, p1Count: 0, status: 'STABLE' },
+      { wilaya: 'Constantine', count: 2, p1Count: 0, status: 'STABLE' },
     ],
     recurringRootCauses: [
-      { type: 'Microwave Backhaul Transport Congestion', count: 6, pctOfTotal: 43 },
-      { type: 'VSWR RF Antenna Return Loss Drift', count: 3, pctOfTotal: 21 },
-      { type: 'Baseband PRB Physical Layer Saturation', count: 3, pctOfTotal: 21 },
-      { type: 'Fiber Transport Intermediate Jitter', count: 2, pctOfTotal: 15 },
+      { type: 'Congestion (Microwave Backhaul Transport)', count: 11, pctOfTotal: 41 },
+      { type: 'Packet Loss (RF Antenna Return Loss Drift)', count: 7, pctOfTotal: 26 },
+      { type: 'Latency (Baseband PRB Physical Saturation)', count: 5, pctOfTotal: 19 },
+      { type: 'Availability (Fiber Transport / Power Loss)', count: 4, pctOfTotal: 14 },
     ],
   };
 }

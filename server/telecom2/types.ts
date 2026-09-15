@@ -264,6 +264,9 @@ export interface ScenarioRequest {
 export type AuditEventType =
   | 'ANOMALY_DETECTED'
   | 'IMPACT_CALCULATED'
+  | 'CELL_IMPACT_CALCULATED'
+  | 'CUSTOMER_IMPACT_CALCULATED'
+  | 'BUSINESS_IMPACT_CALCULATED'
   | 'INCIDENT_CREATED'
   | 'PRIORITY_ASSIGNED'
   | 'AI_ANALYSIS_COMPLETED'
@@ -292,6 +295,23 @@ export interface IncidentAnalytics {
   totalIncidents: number;
   openIncidents: number;
   resolvedIncidents: number;
+  incidentsThisWeek: number;
+  p1Incidents: number;
+  p2Incidents: number;
+  customersAffected: number;
+  revenueRiskDZD: number;
+  topAffectedSites: {
+    siteId: string;
+    siteName: string;
+    wilaya: string;
+    count: number;
+    healthScore?: number;
+  }[];
+  topIncidentTypes: {
+    type: string;
+    count: number;
+    pctOfTotal: number;
+  }[];
   mttrMinutes: {
     overall: number;
     p1: number;

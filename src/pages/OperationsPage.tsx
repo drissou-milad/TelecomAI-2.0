@@ -16,12 +16,17 @@ import {
   Layers, 
   Activity, 
   Sliders, 
-  Search,
-  Filter,
-  Check,
-  ChevronRight,
-  Info
+  Search, 
+  Filter, 
+  Check, 
+  ChevronRight, 
+  Info,
+  BarChart3,
+  Terminal,
+  Flame,
+  Server
 } from 'lucide-react';
+import { LiveEventFeed } from '../components/LiveEventFeed';
 import { 
   TelecomIncident, 
   NetworkCustomerImpact, 
@@ -70,7 +75,7 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
   onSelectCustomer,
   onInspectIncident
 }) => {
-  const [activeTab, setActiveTab] = useState<'incidents' | 'sqm_qos' | 'correlation' | 'itsm_connector'>('incidents');
+  const [activeTab, setActiveTab] = useState<'incidents' | 'sqm_qos' | 'correlation' | 'itsm_connector' | 'analytics' | 'audit_timeline'>('incidents');
   const [priorityFilter, setPriorityFilter] = useState<string>('ALL');
   const [selectedIncident, setSelectedIncident] = useState<TelecomIncident>(incidents[0] || null);
   
@@ -369,6 +374,30 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
         </button>
 
         <button
+          onClick={() => setActiveTab('analytics')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
+            activeTab === 'analytics'
+              ? 'bg-slate-800 text-sky-400 border border-slate-700 shadow-sm'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
+        >
+          <BarChart3 className="w-4 h-4" />
+          <span>Historical Analytics</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('audit_timeline')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
+            activeTab === 'audit_timeline'
+              ? 'bg-slate-800 text-sky-400 border border-slate-700 shadow-sm'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
+        >
+          <Terminal className="w-4 h-4" />
+          <span>Audit / Event Timeline</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('itsm_connector')}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
             activeTab === 'itsm_connector'
@@ -644,6 +673,106 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
                         <span>Historical Pattern Match:</span>
                         <span className="font-mono text-white">82% weight</span>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Priority Evidence Breakdown & Observable Evidence Checklist */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* PRIORITY EVIDENCE */}
+                <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800 space-y-2.5">
+                  <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                      PRIORITY EVIDENCE
+                    </span>
+                    <span className="text-[11px] font-mono text-sky-400 font-bold">
+                      Confidence: 84%
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-xs font-mono">
+                    <div>
+                      <div className="flex justify-between text-slate-300 mb-0.5">
+                        <span className="font-sans">Network severity</span>
+                        <span className="text-white font-bold">40%</span>
+                      </div>
+                      <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-rose-500 rounded-full w-[40%]" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-slate-300 mb-0.5">
+                        <span className="font-sans">Customer impact</span>
+                        <span className="text-white font-bold">25%</span>
+                      </div>
+                      <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-indigo-500 rounded-full w-[25%]" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-slate-300 mb-0.5">
+                        <span className="font-sans">Revenue exposure</span>
+                        <span className="text-white font-bold">20%</span>
+                      </div>
+                      <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-emerald-500 rounded-full w-[20%]" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-slate-300 mb-0.5">
+                        <span className="font-sans">Infrastructure scope</span>
+                        <span className="text-white font-bold">10%</span>
+                      </div>
+                      <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-sky-500 rounded-full w-[10%]" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-slate-300 mb-0.5">
+                        <span className="font-sans">Risk exposure</span>
+                        <span className="text-white font-bold">5%</span>
+                      </div>
+                      <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-500 rounded-full w-[5%]" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* OBSERVABLE EVIDENCE CHECKLIST */}
+                <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800 space-y-2.5">
+                  <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                      OBSERVABLE EVIDENCE
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
+                      6 VERIFIED
+                    </span>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-slate-300">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span>Cell health dropped below normal threshold</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span>Latency increased (+38% above 24h baseline)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span>Packet loss increased (+12% frame discard rate)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span>Multiple cells affected across physical backhaul hub</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span>1,284 subscribers exposed in serving footprint</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span>187 high-risk subscribers exposed with repeat complaints</span>
                     </div>
                   </div>
                 </div>
@@ -1001,6 +1130,236 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* TAB 5: Historical Incident Analytics & MTTR */}
+      {activeTab === 'analytics' && (
+        <div className="space-y-5">
+          {/* Top Metric Cards */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                  <BarChart3 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <span>HISTORICAL INCIDENT ANALYTICS</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      ROLLING 7 DAYS
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Incident velocity, severity distribution, subscriber blast radius, and revenue risk across national RAN.
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs font-mono text-slate-400">Aggregated: 24h intervals</span>
+            </div>
+
+            {/* Core KPI metrics grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 font-mono">
+              <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800">
+                <span className="text-[11px] text-slate-400 block font-sans">Incidents this week</span>
+                <span className="text-2xl font-bold text-white block mt-1">27</span>
+                <span className="text-[10px] text-sky-400 block mt-0.5">100% deduplicated</span>
+              </div>
+
+              <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800">
+                <span className="text-[11px] text-slate-400 block font-sans">P1 incidents</span>
+                <span className="text-2xl font-bold text-rose-400 block mt-1">4</span>
+                <span className="text-[10px] text-rose-400/80 block mt-0.5">Critical SLA active</span>
+              </div>
+
+              <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800">
+                <span className="text-[11px] text-slate-400 block font-sans">P2 incidents</span>
+                <span className="text-2xl font-bold text-amber-400 block mt-1">9</span>
+                <span className="text-[10px] text-amber-400/80 block mt-0.5">Priority queue</span>
+              </div>
+
+              <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800">
+                <span className="text-[11px] text-slate-400 block font-sans">Customers affected</span>
+                <span className="text-2xl font-bold text-sky-400 block mt-1">8,421</span>
+                <span className="text-[10px] text-slate-400 block mt-0.5">Attached subscribers</span>
+              </div>
+
+              <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800 col-span-2 sm:col-span-1">
+                <span className="text-[11px] text-slate-400 block font-sans">Revenue risk</span>
+                <span className="text-2xl font-bold text-emerald-400 block mt-1">142k DZD</span>
+                <span className="text-[10px] text-emerald-400/80 block mt-0.5">Monthly ARPU impact</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Affected Sites & Top Incident Types */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* TOP AFFECTED SITES */}
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                  <Server className="w-4 h-4 text-rose-400" />
+                  <span>TOP AFFECTED SITES</span>
+                </h4>
+                <span className="text-[10px] font-mono text-slate-500">Incident Frequency</span>
+              </div>
+
+              <div className="space-y-2.5 text-xs font-mono">
+                {[
+                  { siteId: 'SA-042', siteName: 'Saïda Central Hub', wilaya: 'Saïda', count: 7, health: 54 },
+                  { siteId: 'OR-017', siteName: 'Oran Marina Port', wilaya: 'Oran', count: 5, health: 68 },
+                  { siteId: 'ALG-103', siteName: 'Algiers Didouche', wilaya: 'Algiers', count: 4, health: 72 },
+                  { siteId: 'TLM-034', siteName: 'Tlemcen Mansourah', wilaya: 'Tlemcen', count: 4, health: 62 },
+                  { siteId: 'CST-088', siteName: 'Constantine Cirta', wilaya: 'Constantine', count: 3, health: 79 }
+                ].map((s) => (
+                  <div key={s.siteId} className="p-3 bg-slate-950 rounded-lg border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-white flex items-center gap-2">
+                        <span className="text-sky-400 font-mono">{s.siteId}</span>
+                        <span className="font-sans font-semibold text-slate-200">• {s.siteName}</span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-sans">{s.wilaya} Region</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-rose-400 font-mono block">
+                        {s.count} incidents
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-sans">Health: {s.health}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* TOP INCIDENT TYPES */}
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  <span>TOP INCIDENT TYPES</span>
+                </h4>
+                <span className="text-[10px] font-mono text-slate-500">Root Cause Categorization</span>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                {[
+                  { type: 'Congestion', count: 11, pct: 41, color: 'bg-rose-500' },
+                  { type: 'Packet loss', count: 7, pct: 26, color: 'bg-amber-500' },
+                  { type: 'Latency', count: 5, pct: 19, color: 'bg-sky-500' },
+                  { type: 'Availability', count: 4, pct: 14, color: 'bg-indigo-500' },
+                ].map((item) => (
+                  <div key={item.type} className="p-2.5 bg-slate-950 rounded-lg border border-slate-800">
+                    <div className="flex justify-between items-center mb-1.5 font-sans">
+                      <span className="font-semibold text-slate-200">{item.type}</span>
+                      <span className="text-sky-400 font-bold font-mono text-xs">
+                        {item.count} incidents ({item.pct}%)
+                      </span>
+                    </div>
+                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${item.color} rounded-full transition-all duration-500`} 
+                        style={{ width: `${item.pct}%` }} 
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* MTTR & Resolution Velocity */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+              <span className="text-xs text-slate-400 flex items-center justify-between">
+                <span>Overall MTTR</span>
+                <Clock className="w-3.5 h-3.5 text-sky-400" />
+              </span>
+              <div className="text-xl font-bold text-white mt-1 font-mono">
+                58 mins
+              </div>
+              <div className="text-[11px] text-emerald-400 mt-0.5">
+                -14% vs. previous month
+              </div>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+              <span className="text-xs text-slate-400 flex items-center justify-between">
+                <span>P1 Mean Resolution</span>
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
+              </span>
+              <div className="text-xl font-bold text-rose-400 mt-1 font-mono">
+                42 mins
+              </div>
+              <div className="text-[11px] text-slate-400 mt-0.5">
+                SLA Target: &lt; 60 mins
+              </div>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+              <span className="text-xs text-slate-400 flex items-center justify-between">
+                <span>P2 Mean Resolution</span>
+                <Clock className="w-3.5 h-3.5 text-amber-400" />
+              </span>
+              <div className="text-xl font-bold text-amber-400 mt-1 font-mono">
+                115 mins
+              </div>
+              <div className="text-[11px] text-slate-400 mt-0.5">
+                SLA Target: &lt; 240 mins
+              </div>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-xl">
+              <span className="text-xs text-slate-400 flex items-center justify-between">
+                <span>SLA Compliance</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              </span>
+              <div className="text-xl font-bold text-emerald-400 mt-1 font-mono">
+                94.2%
+              </div>
+              <div className="text-[11px] text-slate-400 mt-0.5">
+                Target: &gt; 90%
+              </div>
+            </div>
+          </div>
+
+          {/* 7-Day Trend Chart */}
+          <div className="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-xl space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between">
+              <span>Daily Incident Volume & Subscriber Exposure (Last 7 Days)</span>
+              <span className="text-[10px] text-slate-500 font-mono">Aggregation: 24h</span>
+            </h4>
+            <div className="h-52 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={[
+                  { day: 'Mon', incidents: 3, affectedCustomers: 640 },
+                  { day: 'Tue', incidents: 5, affectedCustomers: 1120 },
+                  { day: 'Wed', incidents: 2, affectedCustomers: 450 },
+                  { day: 'Thu', incidents: 6, affectedCustomers: 1890 },
+                  { day: 'Fri', incidents: 4, affectedCustomers: 980 },
+                  { day: 'Sat', incidents: 3, affectedCustomers: 720 },
+                  { day: 'Sun', incidents: 4, affectedCustomers: 1284 },
+                ]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <XAxis dataKey="day" stroke="#64748b" fontSize={11} />
+                  <YAxis stroke="#64748b" fontSize={11} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '11px' }}
+                    formatter={(val: any, name: any) => [val, name === 'incidents' ? 'Incidents' : 'Exposed Users']}
+                  />
+                  <Bar dataKey="incidents" fill="#38bdf8" radius={[4, 4, 0, 0]} name="incidents" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 6: Audit / Event Timeline */}
+      {activeTab === 'audit_timeline' && (
+        <div className="space-y-4">
+          <LiveEventFeed 
+            onSelectIncident={onInspectIncident}
+          />
         </div>
       )}
 

@@ -1,6 +1,6 @@
 {
   "name": "TelecomAI",
-  "description": "AI-Powered Telecom Network & Customer Intelligence Platform for QoS/SQM, customer experience scoring, and ITSM incident management",
+  "description": "AI-Powered Telecom Operations & Customer Impact Intelligence Platform with decision support and automated operational workflow",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
