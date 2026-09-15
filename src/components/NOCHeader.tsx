@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Activity, 
   ShieldAlert, 
@@ -57,6 +57,11 @@ export const NOCHeader: React.FC<NOCHeaderProps> = ({
         ? 'DEGRADED' 
         : 'NORMAL';
 
+  const onManualRefreshRef = useRef(onManualRefresh);
+  useEffect(() => {
+    onManualRefreshRef.current = onManualRefresh;
+  }, [onManualRefresh]);
+
   // Countdown timer and auto-refresh trigger
   useEffect(() => {
     if (!autoRefresh) return;
@@ -64,9 +69,12 @@ export const NOCHeader: React.FC<NOCHeaderProps> = ({
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          setIsRefreshing(true);
-          onManualRefresh();
-          setTimeout(() => setIsRefreshing(false), 600);
+          // Schedule side effects outside the state updater cycle
+          setTimeout(() => {
+            setIsRefreshing(true);
+            onManualRefreshRef.current();
+            setTimeout(() => setIsRefreshing(false), 600);
+          }, 0);
           return refreshInterval;
         }
         return prev - 1;
@@ -74,12 +82,12 @@ export const NOCHeader: React.FC<NOCHeaderProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [autoRefresh, refreshInterval, onManualRefresh]);
+  }, [autoRefresh, refreshInterval]);
 
   const handleManualClick = () => {
     setIsRefreshing(true);
     setCountdown(refreshInterval);
-    onManualRefresh();
+    onManualRefreshRef.current();
     setTimeout(() => setIsRefreshing(false), 600);
   };
 

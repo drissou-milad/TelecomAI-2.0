@@ -114,7 +114,7 @@ export const InteractiveCausalChain: React.FC<InteractiveCausalChainProps> = ({
     const timer = setInterval(() => {
       setActiveStep((prev) => {
         if (prev >= steps.length) {
-          setIsPlaying(false);
+          setTimeout(() => setIsPlaying(false), 0);
           return 1;
         }
         return prev + 1;

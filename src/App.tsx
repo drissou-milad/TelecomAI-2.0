@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from './components/Navbar';
 import { SimulationController } from './components/SimulationController';
 import { NOCHeader } from './components/NOCHeader';
@@ -69,7 +69,7 @@ export default function App() {
     setSelectedIncidentForModal(incidents[0] || null);
   };
 
-  const handleRefreshAllData = async () => {
+  const handleRefreshAllData = useCallback(async () => {
     setLastUpdatedTime(new Date().toLocaleTimeString());
     try {
       const [overviewRes, cellsRes, incidentsRes] = await Promise.all([
@@ -149,7 +149,7 @@ export default function App() {
     } catch (e) {
       console.warn('TelecomAI 2.0 backend polling notice:', e);
     }
-  };
+  }, []);
 
   // Load headline KPIs from the backend on mount and sync 2.0 loop state
   useEffect(() => {
