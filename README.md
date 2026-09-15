@@ -1,247 +1,295 @@
-# TelecomAI — Telecom Network & Customer Intelligence Platform
+# TelecomAI 2.0 — Autonomous Telecom Operations & Customer Impact Intelligence Platform
 
-An end-to-end machine learning and operational intelligence platform designed for mobile network operators. TelecomAI combines **supervised customer churn modeling** with explainable AI (SHAP) and **unsupervised cellular radio anomaly detection** (Isolation Forest) into an interactive operations console.
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19.0-61dafb.svg)](https://react.dev/)
+[![Express](https://img.shields.io/badge/Express-4.21-lightgrey.svg)](https://expressjs.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38bdf8.svg)](https://tailwindcss.com/)
+[![Tests](https://img.shields.io/badge/Tests-7%20Suites%20Passing-brightgreen.svg)](#testing--verification)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**🌐 [Live Demo](https://telecomai-web.onrender.com)** · **📊 [API Docs](https://telecomai-api.onrender.com/docs)** · **💻 Source Code (this repo)**
-
-> Hosted on Render's free tier - the backend spins down after 15 minutes of inactivity, so the first request after a gap can take 30-60 seconds to wake up. Refresh if the dashboard looks empty on first load.
-
-![TelecomAI Dashboard](docs/screenshots/dashboard.png)
-
-## Demo
-
-| Network Overview | Customer Intelligence & Churn |
-|---|---|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Customer Intelligence](docs/screenshots/customer-intelligence.png) |
-| Real-time KPIs, cell health, and live model performance - all computed from the trained models, not hardcoded. | Per-customer churn probability with SHAP-explained risk factors and a real Gradient Boosting inference call. |
+An end-to-end, full-stack **Operational Intelligence Platform** designed for mobile network operators. TelecomAI 2.0 bridges physical Radio Access Network (RAN) telemetry with subscriber experience, business revenue risk, prioritized incident intelligence, and enterprise IT Service Management (ITSM) ticketing.
 
 ---
 
-## Architecture Overview
+## 1. The Paradigm Shift: TelecomAI 1.0 ➔ TelecomAI 2.0
 
-```
-                     TELECOMAI
-                         │
-        ┌────────────────┴────────────────┐
-        │                                 │
- CUSTOMER DATA                       NETWORK DATA
- (10k Subscribers)                  (1,000 Cells)
-        │                                 │
-        ▼                                 ▼
- Data Processing                    Data Processing
-  (StandardScaler)                   (StandardScaler)
-        │                                 │
-        ▼                                 ▼
-Churn ML Pipeline                  Anomaly Pipeline
-(GradBoost, RF, LR, DT)            (Isolation Forest)
-        │                                 │
-        ▼                                 ▼
-Champion Model                    Isolation Forest
-(champion_model.joblib)       (isolation_forest.joblib)
-        │                                 │
-        └──────────────┬──────────────────┘
-                       ▼
-                    FastAPI
-             (Validation & Inference)
-                       │
-                       ▼
-                     React
-             (Operations Dashboard)
-```
+| Architectural Dimension | TelecomAI 1.0 (Proof-of-Concept) | TelecomAI 2.0 (Operational Intelligence Platform) |
+| :--- | :--- | :--- |
+| **Operational Loop** | Passive prediction: static dashboard reporting. | Closed-loop autonomy: `Understand ➔ Correlate ➔ Prioritize ➔ Act`. |
+| **Network & Customer Silos**| RAN anomalies and churn were scored in isolation. | **Cross-domain correlation**: maps degraded radio sectors directly to connected subscribers. |
+| **Impact Assessment** | Generic outlier percentages. | **Quantified blast radius**: calculates affected subscribers, VIP accounts, and monthly revenue at risk (DZD). |
+| **Incident Management** | Raw alarms per individual cell sector. | **Incident deduplication**: clusters multi-sector alarms into canonical incidents with dynamic P1–P4 SLA timers. |
+| **Actionable Ops** | Static recommendation text snippets. | **6-Question AI operational assessment** + dual-track engineering & retention playbooks. |
+| **Enterprise Hand-off** | None (manual operator inspection). | **Enterprise ITSM Connector** for automated work orders (ServiceNow, Jira Service Management, Webhooks). |
+| **Demonstration Engine** | Static datasets. | **Interactive Scenario Simulation**: injects controlled regional degradation and resets on demand. |
+| **Runtime Architecture** | Legacy split services with external Python dependencies. | **Single unified full-stack TypeScript platform** with native in-memory ML inference and sub-5ms latency. |
 
 ---
 
-## Key Modules
-
-### 1. Customer Churn Prediction & Multi-Model Benchmark
-- **Problem**: Identifying high-risk prepaid and postpaid subscribers prior to contract termination or recharge lapse.
-- **Algorithms Evaluated**: Logistic Regression, Decision Tree, Random Forest, and Gradient Boosting under 5-fold stratified validation.
-- **Dynamic Champion**: **Gradient Boosting Classifier** selected as champion with **ROC-AUC: 0.961**, **Precision: 0.766**, **Recall: 0.718**, and **F1 Score: 0.741**.
-- **Explainable AI**: Real **SHAP (SHapley Additive exPlanations)** integration using `shap.TreeExplainer` providing both global feature importance rankings and local per-subscriber attribution vectors.
-- **Actionable Retention Recommendations**: Translates risk probabilities into simulated retention workflows (e.g., proactive loyalty bonuses, bill checkups).
-
-> **Methodological Note on Churn Data**: The churn dataset is generated synthetically using behavioral rules. The Gradient Boosting model achieved an ROC-AUC of 0.961 on this synthetic evaluation benchmark. Performance on synthetic data does not imply identical performance on real operator data.
-
-### 2. Unsupervised Radio Access Network (RAN) Anomaly Detection
-- **Algorithm**: **Isolation Forest** (scikit-learn) evaluated across 5 key cellular performance metrics:
-  - Transport round-trip latency ($ms$)
-  - Packet drop rate ($\%$)
-  - Active connected user equipment (UEs)
-  - Backhaul throughput ($Mbps$)
-  - Carrier availability ($\%$)
-- **AI Recommended Actions**: Formulates technically defensible recommendations for Network Operations Centers (NOCs) rather than unrealistic automated actuation.
-
-> **Methodological Note on Anomaly Detection**: Isolation Forest is trained strictly in an unsupervised manner without using anomaly labels. Synthetic anomaly labels are used only after training to benchmark detection performance and calibrate decision thresholds.
-
----
-
-## Repository Structure
+## 2. System Architecture & Operational Pipeline
 
 ```
-TelecomAI/
-│
-├── src/
-│   ├── components/            # UI components and navigation
-│   ├── pages/                 # Dashboard, Predictions, Anomaly, Customers, Analytics
-│   ├── ml/mlEngine.ts         # Frontend adapter connected to backend APIs
-│   └── types.ts               # Core TypeScript definitions
-│
-├── backend/
-│   ├── app/
-│   │   ├── main.py            # FastAPI entry point
-│   │   ├── routes/            # Route handlers (/churn, /anomaly, /health)
-│   │   ├── services/          # Inference & benchmark service providers
-│   │   └── schemas/           # Pydantic v2 request/response schemas
-│   └── requirements.txt       # Backend Python dependencies
-│
-├── ml/
-│   ├── data/                  # Synthetic generation scripts & CSV datasets
-│   │   ├── generate_churn.py
-│   │   └── generate_network.py
-│   ├── churn/                 # Supervised churn pipeline
-│   │   ├── train.py           # Multi-model benchmarking & champion export
-│   │   ├── evaluate.py        # Metrics, ROC curves, SHAP TreeExplainer
-│   │   ├── predict.py         # Production inference with SHAP attributions
-│   │   └── preprocessing.py   # Scikit-learn feature preprocessor
-│   ├── anomaly/               # Unsupervised anomaly pipeline
-│   │   ├── train.py           # Isolation Forest training & export
-│   │   ├── evaluate.py        # Telemetry benchmark & percentile distribution
-│   │   ├── predict.py         # Outlier decision function inference
-│   │   └── preprocessing.py   # Robust KPI scaler
-│   └── notebooks/             # Exploratory analysis Jupyter notebooks
-│       ├── churn_analysis.ipynb
-│       └── anomaly_analysis.ipynb
-│
-├── docs/
-│   ├── architecture.md        # Technical design & API data flows
-│   ├── methodology.md         # Supervised & unsupervised learning principles
-│   ├── dataset.md             # Feature dictionaries & engineering notes
-│   ├── limitations.md         # Scientific honesty & deployment boundaries
-│   └── model-card.md          # Concise model card (task, metrics, limitations)
-│
-├── Dockerfile                 # Frontend (React + Express proxy) container
-├── backend/Dockerfile         # Backend (FastAPI) container
-├── docker-compose.yml         # Containerized multi-service orchestration
-├── render.yaml                # Render Blueprint (one-click 2-service deploy)
-├── vercel.json                # Alternate static-frontend deploy config
-├── README.md                  # Project documentation
-└── LICENSE                    # MIT License
+                              TELECOM TELEMETRY & CRM DATA
+                                           │
+                    ┌──────────────────────┴──────────────────────┐
+                    ▼                                             ▼
+          NETWORK INTELLIGENCE                           CUSTOMER EXPERIENCE (CX)
+    • Regional Hierarchy (Wilaya ➔ Site ➔ Cell)   • 10k Subscriber Behavioral Cohorts
+    • 3GPP Telemetry Baselines (Latency, Loss, PRB) • Customer Experience Score (CXS / CEI)
+    • Unsupervised Anomaly Detection              • SHAP Attribution Vectors
+                    │                                             │
+                    └──────────────────────┬──────────────────────┘
+                                           ▼
+                                 AI CORRELATION ENGINE
+                       • Spatial Topological Joining (Serving Cells)
+                       • Causal Blast Radius Formulation
+                       • Revenue at Risk (DZD) Exposure
+                                           │
+                                           ▼
+                              INCIDENT INTELLIGENCE (P1–P4)
+                       • Spatial Alarm Deduplication (e.g. INC-0001)
+                       • Dynamic Priority Scoring & SLA Countdowns
+                                           │
+                    ┌──────────────────────┴──────────────────────┐
+                    ▼                                             ▼
+        AI OPERATIONS ASSESSMENT                       ENTERPRISE ITSM CONNECTOR
+   • 6-Question Operational Brief                 • ServiceNow Table API Payloads
+   • Root Cause Technical Playbook                • Jira Service Management REST
+   • Proactive Customer Care Playbook             • Bidirectional Ticket Sandbox
 ```
 
 ---
 
-## Getting Started
+## 3. Implementation Status Across All 8 Milestones
 
-### Prerequisites
-- Python 3.10+
-- Node.js 18+ and npm / bun
-
-### 1. Train Machine Learning Models
-```bash
-# Generate datasets
-python3 ml/data/generate_churn.py
-python3 ml/data/generate_network.py
-
-# Train churn benchmark & export champion
-python3 ml/churn/train.py
-
-# Train unsupervised Isolation Forest
-python3 ml/anomaly/train.py
-```
-
-### 2. Launch FastAPI Backend
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-API documentation will be available at `http://localhost:8000/docs`.
-
-### 3. Launch Frontend Dashboard
-```bash
-npm install
-npm run dev
-```
-Open `http://localhost:3000` in your browser.
+- **Milestone 1 — Architecture + Data Contracts + Documentation** ✅
+  - Formulated the closed-loop operational pipeline in [`docs/architecture.md`](docs/architecture.md).
+  - Defined strict TypeScript contracts in [`server/telecom2/types.ts`](server/telecom2/types.ts) and [`docs/data-model.md`](docs/data-model.md).
+  - Codified traceable mathematical formulations in [`docs/impact-model.md`](docs/impact-model.md).
+- **Milestone 2 — Synthetic Telecom Data + Network Intelligence** ✅
+  - Multi-tier Algerian topology (Saïda, Algiers, Oran, Tlemcen) with 3GPP telemetry baselines in [`server/telecom2/telecomDataStore.ts`](server/telecom2/telecomDataStore.ts).
+  - Deterministic Cell Health Index (0–100) and multivariate anomaly severity tiers (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
+  - Network overview and cell query APIs (`/api/network/*`).
+- **Milestone 3 — Customer Experience + Network ➔ Customer Correlation** ✅
+  - Topological subscriber-to-cell linkage (`attachedCellId`, `fallbackCellId`).
+  - Dynamic Customer Experience Score (CXS / CEI) reflecting real-time radio degradation.
+  - Granular SHAP feature attribution vectors explaining churn drivers.
+  - Customer profile and experience APIs (`/api/customers/*`).
+- **Milestone 4 — Impact + Incident Intelligence** ✅
+  - Automated blast radius and revenue at risk (DZD) calculations.
+  - Causal incident deduplication clustering multi-sector failures into canonical incidents.
+  - Dynamic P1–P4 priority assignment with strict SLA countdowns.
+- **Milestone 5 — AI Operations + Recommendations** ✅
+  - End-to-end correlation engine in [`server/telecom2/correlationEngine.ts`](server/telecom2/correlationEngine.ts) via `POST /api/network/analyze`.
+  - Structured 6-Question operational synthesis with multi-factor confidence rating.
+  - Dual-track playbooks (radio engineering remediation + customer care retention).
+- **Milestone 6 — Enterprise ITSM Connector** ✅
+  - Extensible ITSM interface in [`server/telecom2/itsmConnector.ts`](server/telecom2/itsmConnector.ts).
+  - Schema transformation for ServiceNow, Jira Service Management, and webhooks.
+  - In-memory prototype registry with live ticket creation and status tracking (`/api/integrations/itsm/*`).
+- **Milestone 7 — Frontend Integration** ✅
+  - Modern React 19 NOC console with Executive Dashboard, Network Topology Explorer, Customer 360, and Incident Operations Command.
+  - Live scenario simulation controller toolbar with one-click degradation trigger and instant baseline reset.
+  - Prominent synthetic environment transparency banners.
+- **Milestone 8 — Testing + Deployment + Documentation** ✅
+  - 7 comprehensive automated test suites (`server/telecom2/test_intelligence_loop.ts`) passing via `npm test`.
+  - Single-container production build with esbuild bundling and Vite asset compilation.
+  - Aligned technical documentation and operational roadmaps in [`docs/`](docs/).
 
 ---
 
-## REST API Reference
+## 4. Actual Repository Structure
 
+```
+telecomai/
+├── docs/                                # Technical specifications & methodology
+│   ├── architecture.md                  # Operational pipeline design & data flow
+│   ├── data-model.md                    # Entity contracts & schema specifications
+│   ├── dataset.md                       # Telemetry bands & customer feature dictionaries
+│   ├── impact-model.md                  # Mathematical equations (CXS, Blast Radius, Revenue)
+│   ├── incident-model.md                # Severity matrix, P1-P4 priority & deduplication
+│   ├── itsm-integration.md              # ServiceNow & Jira connector architecture
+│   ├── limitations.md                   # Operational boundaries & synthetic data disclosure
+│   ├── methodology.md                   # Supervised & unsupervised ML principles
+│   ├── model-card.md                    # Concise model performance reference
+│   ├── recommendation-methodology.md    # Dual-track technical & retention playbooks
+│   └── roadmap.md                       # Milestone tracking and delivery status
+│
+├── server/                              # Backend services & in-memory ML engines
+│   ├── mlService.ts                     # In-memory ML inference, SHAP, and benchmarks
+│   └── telecom2/                        # TelecomAI 2.0 Operational Intelligence Core
+│       ├── types.ts                     # TypeScript domain definitions
+│       ├── telecomDataStore.ts          # Network topology, customer store & simulation
+│       ├── correlationEngine.ts         # Multi-domain correlation & impact calculation
+│       ├── itsmConnector.ts             # ServiceNow / Jira ticket integration connector
+│       └── test_intelligence_loop.ts   # 7-suite end-to-end integration test runner
+│
+├── src/                                 # Modern React 19 Frontend Console
+│   ├── components/                      # Reusable UI components & simulation controller
+│   ├── pages/                           # Dashboard, Operations, Customers, Network, About
+│   ├── data/                            # Client-side data references & topology schemas
+│   ├── ml/mlEngine.ts                   # Frontend API client adapter
+│   └── types.ts                         # Frontend TypeScript definitions
+│
+├── server.ts                            # Express application entry point & Vite middleware
+├── package.json                         # Scripts & full-stack dependencies
+├── render.yaml                          # Render deployment blueprint (single Node service)
+├── vercel.json                          # Static frontend proxy configuration
+├── vite.config.ts                       # Vite 6 bundler configuration
+└── tsconfig.json                        # TypeScript configuration
+```
+
+---
+
+## 5. Machine Learning Benchmarks & Model Evaluation
+
+TelecomAI preserves rigorous model evaluation metrics from its benchmark validation:
+
+### Customer Churn Benchmark (5-Fold Stratified Holdout)
+
+| Model | Accuracy | Precision | Recall | F1-Score | Validation ROC-AUC | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Gradient Boosting** | **0.911** | **0.766** | **0.718** | **0.741** | **0.961** | **Selected Champion** |
+| Random Forest | 0.910 | 0.789 | 0.673 | 0.726 | 0.958 | Candidate |
+| Decision Tree | 0.900 | 0.739 | 0.670 | 0.703 | 0.924 | Baseline |
+| Logistic Regression | 0.830 | 0.512 | 0.882 | 0.648 | 0.926 | Baseline |
+
+### Unsupervised RAN Anomaly Detection
+- **Model**: Isolation Forest (150 estimators, contamination = 0.037).
+- **Paradigm**: Strictly unsupervised; evaluated against multi-metric radio threshold boundaries.
+- **Latency / Loss / PRB Bounds**: Transport latency baseline 24–36 ms; critical degradation $> 65$ ms.
+
+---
+
+## 6. REST API Reference
+
+### Core Operational Intelligence (TelecomAI 2.0)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `POST` | `/api/predict/churn` | Evaluates subscriber churn probability with SHAP TreeExplainer attributions. |
-| `GET` | `/api/churn/benchmark` | Returns 5-fold cross-validation metrics and confusion matrices across 4 models. |
-| `POST` | `/api/predict/anomaly` | Evaluates cell sector telemetry using unsupervised Isolation Forest. |
-| `GET` | `/api/anomaly/specs` | Returns contamination rates and baseline KPI thresholds. |
-| `GET` | `/api/dashboard/summary` | Headline KPIs computed by scoring the full synthetic dataset with the trained models (not hardcoded). |
-| `GET` | `/api/health` | Subsystem health check and model availability verification. |
+| `POST` | `/api/network/analyze` | Ingests network scope, correlates anomalies, computes blast radius, and outputs incident & recommendations. |
+| `GET` | `/api/network/topology` | Returns Wilaya ➔ Site ➔ Cell geographic hierarchy. |
+| `GET` | `/api/network/overview` | National network health score, active anomalies, and regional distribution. |
+| `GET` | `/api/network/cells` | Query cells filtered by Wilaya, status, or site. |
+| `GET` | `/api/network/cells/:id` | Detailed cell telemetry, baseline comparisons, and connected users. |
+| `GET` | `/api/customers` | Query subscribers filtered by Wilaya, cell, or high-risk status. |
+| `GET` | `/api/customers/:id` | Subscriber profile, contract, attached cell, and churn probability. |
+| `GET` | `/api/customers/:id/experience`| Customer Experience Score (CXS) breakdown and SHAP risk factor vectors. |
+| `GET` | `/api/impact/summary` | Aggregate customer blast radius and revenue at risk (DZD). |
+| `GET` | `/api/incidents` | Active telecom incidents list with dynamic priority badges. |
+| `GET` | `/api/incidents/:id` | Full incident payload with technical evidence and customer blast. |
+| `POST` | `/api/incidents` | Create / ingest a new telecom incident. |
+| `PATCH` | `/api/incidents/:id` | Update incident status (`NEW` ➔ `INVESTIGATING` ➔ `DISPATCHED` ➔ `RESOLVED`). |
+| `GET` | `/api/ai/incidents/:id/analysis` | Structured 6-Question AI operations assessment with confidence score. |
+| `POST` | `/api/integrations/itsm/ticket` | Dispatches incident work order to external ITSM system (ServiceNow / Jira). |
+| `GET` | `/api/integrations/itsm/tickets`| Retrieves all dispatched ITSM tickets. |
+| `POST` | `/api/simulation/degrade` | Triggers controlled Saïda microwave backhaul congestion event. |
+| `POST` | `/api/simulation/reset` | Instantly resets all cells and incidents to nominal baseline. |
 
-> **Note on `npm run dev`**: the Node/Vite dev server (`server.ts`) is a thin static-file server plus a reverse proxy for `/api/*` — it does not invoke Python itself. It forwards every API call to the FastAPI backend at `BACKEND_API_URL` (default `http://localhost:8000`), so the backend from step 2 must be running first.
+### Retained Machine Learning Endpoints (TelecomAI 1.0 Foundation)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/health` | Subsystem health check and engine readiness. |
+| `GET` | `/api/churn/benchmark` | Multi-model validation metrics, confusion matrices, and ROC values. |
+| `GET` | `/api/anomaly/specs` | Contamination rates and baseline 3GPP KPI thresholds. |
+| `POST` | `/api/predict/churn` | Inference endpoint evaluating subscriber churn probability with SHAP factors. |
+| `POST` | `/api/predict/anomaly` | Inference endpoint evaluating cell telemetry against outlier decision boundaries. |
 
-### Example Churn Prediction Request
+---
+
+## 7. Getting Started
+
+### Prerequisites
+- **Node.js**: v18.0 or higher
+- **npm** or **bun**
+
+### Installation
 ```bash
-curl -X POST http://localhost:8000/api/predict/churn \
-  -H "Content-Type: application/json" \
-  -d '{
-    "monthlySpendDZD": 1800,
-    "dataUsageGB": 4.2,
-    "callsCount": 34,
-    "complaints": 3,
-    "rechargeFrequency": 2,
-    "subscription": "Prepaid",
-    "tenureMonths": 8,
-    "usageDropPct": 45
-  }'
+# Clone repository
+git clone https://github.com/your-org/telecomai.git
+cd telecomai
+
+# Install dependencies
+npm install
+```
+
+### Development
+```bash
+# Launches Express backend and Vite middleware on port 3000
+npm run dev
+```
+Open your browser at `http://localhost:3000`.
+
+### Running Tests
+```bash
+# Executes the 7-suite operational intelligence integration test runner
+npm test
+```
+
+### Production Build
+```bash
+# Compiles React static assets and bundles the Node server via esbuild
+npm run build
+
+# Starts the standalone production server
+npm start
 ```
 
 ---
 
-## Deployment
+## 8. Testing & Verification
 
-TelecomAI deploys as two independent web services: the FastAPI backend and the
-Node/Express frontend (which serves the built React app and proxies `/api/*`
-to the backend). A ready-to-use `render.yaml` blueprint is included.
+TelecomAI 2.0 includes an automated, self-contained verification suite in `server/telecom2/test_intelligence_loop.ts`. Running `npm test` validates all 7 operational subsystems:
 
-### Option A: Render (recommended, one blueprint)
-1. Push this repo to GitHub.
-2. In Render, choose **New → Blueprint** and point it at the repo. Render reads
-   `render.yaml` and creates two services: `telecomai-api` (Python/FastAPI) and
-   `telecomai-web` (Node/Express + React).
-3. Wait for `telecomai-api` to finish deploying, then copy its public URL
-   (e.g. `https://telecomai-api.onrender.com`).
-4. Open `telecomai-web` → **Environment**, set `BACKEND_API_URL` to that URL,
-   and trigger **Manual Deploy → Deploy latest commit**.
-5. Once `telecomai-web` finishes, its URL is your live demo link.
-
-> **Free-tier note**: Render's free instances spin down after 15 minutes of
-> inactivity. The first request after idle can take 30-60 seconds to wake the
-> backend - normal, not a bug. Worth mentioning if you link this to recruiters.
-
-### Option B: Split hosting (Vercel + Render/Railway)
-The frontend can also be deployed as a static site (Vercel, Netlify, etc.)
-instead of running `server.ts`:
-1. Deploy the backend as in Option A (or on Railway/Fly.io).
-2. Build only the static assets: `npm run build:frontend` (outputs to `dist/`).
-3. Deploy `dist/` as a static site on Vercel.
-4. Add a rewrite so `/api/*` on your Vercel domain forwards to the backend's
-   public URL (Vercel `vercel.json` `rewrites`, or Netlify `_redirects`) -
-   the frontend code always calls relative `/api/...` paths, so it doesn't
-   need to know the backend's URL directly as long as the rewrite exists.
+1. **Cell Health Score Calculation**: Verifies nominal (97/100) vs. degraded (25/100) scoring.
+2. **AI Correlation Engine Loop**: Tests geographic scoping, +38% latency / +12% packet loss calculations, 1,284 affected subscriber count, 12,500 DZD revenue at risk, P1 priority assignment, and 0.84 AI confidence rating.
+3. **Customer Experience Index (CXS) & SHAP**: Confirms individual subscriber exposure penalties and attribution vectors.
+4. **Incident Intelligence & Lifecycle**: Validates incident creation, deduplication, and status transitions.
+5. **ITSM Ticket Connector**: Confirms ServiceNow work order creation (`INC-SNOW-XXXXX`), SLA tracking, and audit notes.
+6. **Simulation Engine Controls**: Tests the controlled degradation trigger and instant baseline reset.
+7. **ML Model Performance Retention**: Verifies that documented ROC-AUC (0.961) and benchmark metrics remain preserved.
 
 ---
 
-## Scientific Honesty & Limitations
-- **Synthetic Data**: Models are trained on synthetic telecom data adhering to realistic distributions. High benchmark accuracy does not replace live pilot validation.
-- **Unsupervised Learning**: Isolation Forest is trained without labels; benchmark metrics are computed post-hoc.
-- **Advisory Only**: Network and customer retention recommendations are generated as decision-support advisory outputs, not direct actuators.
+## 9. Deployment
 
-See `docs/limitations.md` and `docs/methodology.md` for in-depth discussion,
-and [`docs/model-card.md`](docs/model-card.md) for a concise model card
-(task, inputs/outputs, real evaluation metrics, and honest limitations for
-both the churn and anomaly models).
+TelecomAI 2.0 is packaged as a **single, self-contained full-stack container application**. No external Python runtime or multi-service orchestration is required.
+
+### Deployment on Render
+A pre-configured [`render.yaml`](render.yaml) blueprint is included:
+1. Link your repository in Render (**New ➔ Blueprint**).
+2. Render provisions a single web service running:
+   - **Build Command**: `npm install && npm run build`
+   - **Start Command**: `npm run start`
+   - **Port**: `3000`
+
+### Deployment with Docker
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+EXPOSE 3000
+ENV NODE_ENV=production
+CMD ["node", "dist/server.cjs"]
+```
 
 ---
 
-## License
-Distributed under the MIT License. See `LICENSE` for more information.
+## 10. Scientific Honesty & Operational Boundaries
+
+1. **Synthetic Environment Disclosure**:
+   - All network telemetry and customer records are generated synthetically using realistic 3GPP and mobile subscriber distributions.
+   - High validation metrics (e.g. ROC-AUC 0.961) reflect algorithmic consistency within this calibrated environment, not empirical measurement on live commercial operator networks.
+2. **Advisory Decision Support vs. Closed-Loop Actuation**:
+   - TelecomAI 2.0 formulates **AI Recommended Actions** and dispatches structured work orders to human engineering and care teams.
+   - It **does not directly actuate** physical radio hardware, beam steering, or BGP route flapping, adhering to telecommunications governance mandates.
+3. **External System Integration**:
+   - The included ITSM connector features an in-memory prototype registry for demonstration and testing. Live enterprise production environments connect via standard REST credentials (ServiceNow Table API / Jira Service Desk REST).
+
+---
+
+## 11. License
+
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for details.

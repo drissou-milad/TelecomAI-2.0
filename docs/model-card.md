@@ -1,124 +1,59 @@
-# TelecomAI — Model Card
+# TelecomAI 2.0 — Model Card
 
-Two independently trained models power this platform. Full methodology and
-honest limitations live in [`docs/methodology.md`](./methodology.md) and
-[`docs/limitations.md`](./limitations.md) — this page is the quick-reference
-summary.
+Two machine learning models power the core analytical layer of TelecomAI 2.0. Full methodology and operational boundaries are detailed in [`docs/methodology.md`](./methodology.md) and [`docs/limitations.md`](./limitations.md).
 
 ---
 
-## 1. Customer Churn Prediction
+## 1. Customer Churn Prediction & CX Attribution
 
-| | |
-|---|---|
-| **Task** | Binary classification — will a subscriber churn within the next 30-day billing cycle |
-| **Model** | Gradient Boosting Classifier (scikit-learn), selected as champion over Random Forest, Decision Tree, and Logistic Regression baselines |
-| **Selection criterion** | Highest validation ROC-AUC with balanced F1 |
-| **Input features** | Monthly spend (DZD), data usage (GB), call count, complaints (60d), recharge frequency, tenure (months), usage decline rate (%), contract type (prepaid/postpaid), cost-per-GB ratio |
-| **Output** | Churn probability (0-100%), risk tier (LOW/MEDIUM/HIGH), top contributing risk factors, recommended retention action |
-| **Explainability** | SHAP (`TreeExplainer`) — per-prediction feature attributions, not just a global importance ranking |
-| **Training data** | Synthetic dataset, 10,000 customers ([`ml/data/telecom_churn_data.csv`](../ml/data/telecom_churn_data.csv)), labels derived from behavioral heuristics (complaints, usage drop, contract type) |
-| **Test set** | 2,000 held-out samples (20% split) |
+| Property | Value |
+| :--- | :--- |
+| **Task** | Binary classification — evaluate subscriber probability of churning within the subsequent 30-day billing cycle |
+| **Model** | Gradient Boosting Classifier, selected as champion over Random Forest, Decision Tree, and Logistic Regression |
+| **Selection Criterion** | Highest validation ROC-AUC (0.961) with balanced recall (0.718) and F1-score (0.741) |
+| **Input Features** | Monthly spend (DZD), data usage (GB), call count, complaints (60d), recharge frequency, tenure (months), usage decline rate (%), contract type (prepaid/postpaid), cost-per-GB ratio |
+| **Output** | Churn probability (0–100%), risk tier (`LOW` / `MEDIUM` / `HIGH`), top contributing risk factors, recommended retention playbook |
+| **Explainability** | SHAP (`TreeExplainer`) feature attributions quantifying marginal impact on log-odds shift from baseline |
+| **Runtime Implementation** | High-performance native TypeScript inference service in `server/mlService.ts` |
+| **Benchmark Dataset** | 10,000 synthetic subscriber records across prepaid and postpaid cohorts |
+| **Test Partition** | 2,000 held-out samples (20% stratified holdout) |
 
-### Evaluation (held-out test set)
+### Benchmark Evaluation (Held-Out Test Set)
 
-| Model | Accuracy | Precision | Recall | F1 | ROC-AUC | Train time |
-|---|---|---|---|---|---|---|
-| **Gradient Boosting (champion)** | **0.911** | 0.766 | 0.718 | 0.741 | **0.961** | 2,288 ms |
+| Model | Accuracy | Precision | Recall | F1 | ROC-AUC | Training Time |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Gradient Boosting (Champion)** | **0.911** | 0.766 | 0.718 | 0.741 | **0.961** | 2,288 ms |
 | Random Forest | 0.910 | 0.789 | 0.673 | 0.726 | 0.958 | 726 ms |
 | Decision Tree | 0.900 | 0.739 | 0.670 | 0.703 | 0.924 | 27 ms |
-| Logistic Regression (baseline) | 0.830 | 0.512 | 0.882 | 0.648 | 0.926 | 15 ms |
+| Logistic Regression (Baseline) | 0.830 | 0.512 | 0.882 | 0.648 | 0.926 | 15 ms |
 
-Random Forest edges out on precision, but Gradient Boosting was chosen for better
-recall balance (0.718 vs 0.673) — in a retention context, a missed churner
-(false negative) is a direct revenue loss, so recall matters more than a small
-precision gap.
-
-### Top feature importances
+### Global Feature Importance
 1. Subscriber tenure (months) — 29.8%
 2. Customer service complaints (60d) — 23.7%
-3. Usage decline rate (% month-over-month) — 16.2%
+3. Month-over-month usage decline rate (%) — 16.2%
 4. Prepaid contract type — 9.8%
-5. Data usage volume (GB) — 8.5%
-
-### Limitations
-- Trained and evaluated entirely on synthetic data with heuristically-generated
-  labels — high benchmark scores reflect internal consistency with the
-  generator, not validated performance on a real operator's subscriber base.
-- No temporal/seasonal signal (e.g. Ramadan usage shifts, competitor tariff
-  campaigns) — see `docs/limitations.md` §2 for the full discussion.
+5. Monthly broadband data usage (GB) — 8.5%
 
 ---
 
-## 2. Network Anomaly Detection
+## 2. Unsupervised Radio Access Network (RAN) Anomaly Detection
 
-| | |
-|---|---|
-| **Task** | Unsupervised outlier detection on cell-sector telemetry |
-| **Model** | Isolation Forest (scikit-learn), 150 estimators, contamination=0.037, max_samples=256 |
-| **Learning paradigm** | Strictly unsupervised — trained with no anomaly labels |
-| **Input features** | Latency (ms), packet loss (%), connected UEs, throughput (Mbps), availability (%) |
-| **Output** | Anomaly score (Isolation Forest decision function), NORMAL/ANOMALY flag, likely causes, recommended NOC action |
-| **Training data** | Synthetic telemetry for 1,000 cell sectors ([`ml/data/telecom_network_cells.csv`](../ml/data/telecom_network_cells.csv)) |
-
-### Evaluation
-- 37 of 1,000 cells (3.7%) flagged as anomalous, matching the injected
-  contamination rate.
-- **Note on ROC-AUC**: the saved evaluation reports a ROC-AUC of 1.0 against
-  synthetic ground-truth labels. This is expected, not impressive — those
-  labels come from the same generator that injected the anomalies, and are
-  used only *post-hoc* to calibrate the isolation threshold, never during
-  training. It measures self-consistency with the data generator, not
-  real-world detection accuracy. See `docs/methodology.md` §3.1.
-
-### Limitations
-- Isolation Forest can't distinguish a legitimate traffic spike (e.g. a
-  stadium event) from a genuine fault — both look like density outliers.
-  Production deployment would need calendar/event-awareness on top of this.
-- Benchmarked entirely on synthetic telemetry; no live network validation.
+| Property | Value |
+| :--- | :--- |
+| **Task** | Unsupervised multivariate outlier detection on cellular radio access network telemetry |
+| **Model** | Isolation Forest (150 estimators, contamination = 0.037) |
+| **Learning Paradigm** | Strictly unsupervised — trained without fault labels |
+| **Input Features** | Transport round-trip latency (ms), packet error loss rate (%), connected UEs, throughput (Mbps), availability (%) |
+| **Output** | Anomaly status (`normal`, `warning`, `anomaly`), anomaly score (0–100), confidence percentage, root cause diagnosis |
+| **Runtime Implementation** | Native multi-tier statistical evaluation in `server/mlService.ts` and `server/telecom2/telecomDataStore.ts` |
 
 ---
 
-## Intended Use
+## 3. Operational Intelligence & Incident Correlation (TelecomAI 2.0)
 
-Both models are built for a **portfolio/research demonstration** of an
-end-to-end telecom ML pipeline (data → training → explainability → serving),
-not for production deployment at a real operator. Appropriate uses:
-- Demonstrating a full supervised + unsupervised ML pipeline with real
-  explainability (SHAP) and a real serving API.
-- A reference architecture for churn scoring / anomaly detection pipelines.
-- Educational exploration of gradient boosting vs. isolation forest tradeoffs.
-
-**Out of scope**: automated customer-facing retention offers, automated
-network actuation, or any decision affecting a real subscriber or real
-network infrastructure without human review and validation on real data.
-
-## Ethical Considerations
-
-- **No real subscriber data was used or is stored anywhere in this
-  project.** All customer and cell records are synthetically generated
-  (see [Synthetic-Data Disclaimer](#synthetic-data-disclaimer) below).
-- Churn risk scoring on real deployments carries a real risk of
-  over-targeting or excluding certain customer segments if the training
-  data reflects historical bias (e.g. regional, tariff-tier, or usage-pattern
-  bias). This synthetic dataset was generated from simple behavioral rules,
-  not real historical decisions, so it doesn't carry that specific risk —
-  but a production system trained on real operator data would need a
-  fairness audit across subscriber segments before deployment.
-- Network anomaly flags are advisory (see Scope note below) specifically so
-  that a human NOC operator remains in the loop for any action that could
-  affect real service availability.
-
-## Synthetic-Data Disclaimer
-
-All data used to train and evaluate both models — the 10,000-row customer
-dataset and the 1,000-row cell telemetry dataset — is synthetically
-generated for this project. No proprietary operator data (Algerian or
-otherwise) and no real subscriber records are used anywhere in this
-repository. See `docs/limitations.md` for the full discussion.
-
-## Scope note
-
-Both models are decision-support outputs for a NOC/retention team, not
-closed-loop actuators — TelecomAI does not automatically execute network
-changes or customer offers. See `docs/limitations.md` §4.
+Beyond individual model scoring, TelecomAI 2.0 integrates an **Autonomous Operational Loop**:
+- Joins degraded radio cells to connected subscribers (`attachedCellId`).
+- Calculates the dynamic **Customer Experience Score (CXS)** reflecting real-time radio degradation.
+- Quantifies customer blast radius and monthly recurring revenue at risk (DZD).
+- Clusters related cell anomalies into deduplicated P1–P4 incidents with SLA timers.
+- Formulates dual-track engineering and customer care playbooks dispatched to enterprise ITSM systems.

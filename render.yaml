@@ -1,20 +1,8 @@
 services:
-  # FastAPI backend - real inference (churn + anomaly models, SHAP, dashboard aggregation)
+  # TelecomAI 2.0 — Unified Full-Stack Node/TypeScript Operational Intelligence Platform
+  # Built with Vite, Express, esbuild, and native in-memory ML correlation engine
   - type: web
-    name: telecomai-api
-    runtime: python
-    plan: free
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.12.0
-
-  # React frontend + thin Express reverse proxy (server.ts) - forwards /api/* to telecomai-api.
-  # BACKEND_API_URL must be set manually after telecomai-api's first deploy finishes -
-  # see README "Deployment" section for the exact steps.
-  - type: web
-    name: telecomai-web
+    name: telecomai
     runtime: node
     plan: free
     buildCommand: npm install && npm run build
@@ -22,5 +10,5 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: BACKEND_API_URL
-        sync: false
+      - key: PORT
+        value: 3000

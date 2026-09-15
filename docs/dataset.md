@@ -1,62 +1,80 @@
-# TelecomAI — Dataset Architecture & Feature Engineering
+# TelecomAI 2.0 — Dataset Architecture & Telemetry Engineering
 
 ## 1. Overview
 
-TelecomAI includes reproducible data generation and preprocessing pipelines in `/ml/data` for both subscriber behavior and radio access network telemetry.
+TelecomAI 2.0 operates on a fully deterministic synthetic telecom environment, providing unified data models for radio access network (RAN) telemetry and subscriber behavior. The dataset generation logic, behavioral distributions, and network baselines are codified directly within the TypeScript data engine (`server/telecom2/telecomDataStore.ts` and `server/mlService.ts`), ensuring zero-dependency, reproducible execution.
 
 ---
 
-## 2. Customer Churn Dataset (`telecom_churn_data.csv`)
+## 2. Customer Churn & Experience Dataset
 
 ### 2.1 Dataset Specifications
-- **Total Records**: 10,000 subscriber accounts
-- **Synthetic Base Churn Rate**: $\approx 17.8\%$ (realistic baseline for prepaid-dominant African/MENA markets)
-- **Features**: 8 raw attributes + engineered interaction metrics
+- **Monitored Subscribers**: 10,000 synthetic subscriber records across regional footprints.
+- **Base Churn Rate**: $\approx 17.8\%$ (calibrated to realistic emerging/prepaid-dominant mobile market dynamics).
+- **Features**: 8 behavioral attributes + calculated interaction metrics + topological network attachment.
 
 ### 2.2 Feature Dictionary
 
 | Feature Name | Type | Description | Range / Categories |
 | :--- | :--- | :--- | :--- |
-| `customer_id` | String | Unique subscriber identifier | `C10001` - `C20000` |
-| `monthly_spend_dzd` | Float | Average monthly expenditure in Algerian Dinars (DZD) | 300 - 9,500 DZD |
-| `data_usage_gb` | Float | Monthly data consumption volume | 0.5 - 120.0 GB |
-| `calls_count` | Integer | Monthly outbound call count | 5 - 350 calls |
+| `customerId` | String | Unique subscriber identifier | `C10001` - `C20000` / `CUST-SAI-001` |
+| `monthlySpendDZD` | Float | Average monthly billing expenditure in Algerian Dinars | 300 - 9,500 DZD |
+| `dataUsageGB` | Float | Monthly mobile broadband data consumption | 0.5 - 120.0 GB |
+| `callsCount` | Integer | Outbound cellular call count per month | 5 - 350 calls |
 | `complaints` | Integer | Customer service complaints logged in past 60 days | 0 - 6 |
-| `recharge_frequency`| Integer | Balance replenishment events per month | 1 - 12 recharges |
-| `subscription` | String | Account billing contract type | `Prepaid`, `Postpaid` |
-| `tenure_months` | Integer | Subscriber account age in months | 1 - 72 months |
-| `usage_drop_pct` | Float | Month-over-month usage decrease percentage | 0.0% - 90.0% |
-| `churn` | Integer | Ground truth binary churn indicator (target) | `0` (Retained), `1` (Churned) |
+| `rechargeFrequency`| Integer | Balance replenishment events per billing period | 1 - 12 recharges |
+| `subscription` | String | Account billing contract category | `Prepaid`, `Postpaid` |
+| `tenureMonths` | Integer | Continuous subscriber account tenure | 1 - 72 months |
+| `usageDropPct` | Float | Month-over-month usage decrease percentage | 0.0% - 90.0% |
+| `attachedCellId` | String | Primary serving radio cell sector | e.g., `CELL-SAI-001` |
+| `fallbackCellId` | String | Adjacent handover candidate sector | e.g., `CELL-SAI-002` |
+| `cxs` | Integer | Customer Experience Score (0–100 composite index) | 0 - 100 |
 
-### 2.3 Feature Engineering
-The preprocessor (`ml/churn/preprocessing.py`) automatically constructs:
-- `is_prepaid`: Binary encoding for contract flexibility.
-- `arpu_to_usage_ratio`: Spend per gigabyte index, highlighting price sensitivity and tariff mismatch.
-- Standardized numeric scaling via `StandardScaler` fitted strictly on training partitions to prevent data leakage.
+### 2.3 Customer Experience Score (CXS / CEI) Formulation
+The Customer Experience Score synthesizes 4 distinct operational pillars:
+1. **Network QoE Factor (40%)**: Ratio of current serving cell latency and packet loss to baseline.
+2. **Service & Care Factor (25%)**: Penalty proportional to recent complaint volume.
+3. **Usage Stability Factor (20%)**: Month-over-month data/voice drop indicators.
+4. **Tenure Loyalty Factor (15%)**: Long-term tenure buffering against transient dissatisfaction.
 
 ---
 
-## 3. Network Radio Telemetry Dataset (`telecom_network_cells.csv`)
+## 3. Network Radio Access Telemetry Dataset
 
 ### 3.1 Dataset Specifications
-- **Total Monitored Cells**: 1,000 cell sectors across Algiers, Oran, Constantine, and Annaba
-- **Nominal vs Outlier Split**: $\approx 96.3\%$ nominal, $3.7\%$ injected multi-metric telemetry anomalies
+- **Hierarchical Structure**: 4 Wilayas (**Saïda**, **Algiers**, **Oran**, **Tlemcen**), hosting base station sites and multi-sector directional cell carriers.
+- **Monitored Radio Sectors**: Directional 4G-LTE and 5G-NR cell carriers with azimuth alignments (0°, 120°, 240°).
+- **Nominal Operating Baselines**: Calibrated 3GPP performance thresholds.
 
 ### 3.2 Monitored Key Performance Indicators (KPIs)
 
-| Metric | Nominal Distribution | Anomaly Signature |
+| Metric | Nominal Baseline | Anomaly Signature (Degradation Event) |
 | :--- | :--- | :--- |
-| `latency_ms` | $\mathcal{N}(28, 6)$ ms | Severe spike $> 75$ ms |
-| `packet_loss_pct` | $\text{Beta}(1, 20) \approx 0.3\%$ | Drop rate $> 2.5\%$ |
-| `users` | 300 - 1,100 connected UEs | Extreme overload $> 1,600$ UEs |
-| `traffic_mbps` | 200 - 650 Mbps | Backhaul saturation $> 850$ Mbps |
-| `availability_pct` | $99.5\% \pm 0.3\%$ | Degraded carrier $< 97.0\%$ |
+| `latencyMs` | 24 - 36 ms | Surge $> 65$ ms (+38% to +80% over baseline) |
+| `packetLossPct` | 0.2% - 0.4% | Severe increase $> 2.0\%$ (+12% to +25% delta) |
+| `connectedUsers` | 150 - 450 active UEs | Overload $> 600$ UEs or abnormal drop |
+| `trafficMbps` | 120 - 320 Mbps | Throughput degradation below provisioned capacity |
+| `availabilityPct` | 99.8% $\pm 0.1\%$ | Carrier availability drop $< 95.0\%$ |
+| `prbUtilizationPct`| 35% - 55% | PRB saturation $> 85\%$ |
 
 ---
 
-## 4. Scientific Honesty & Synthetic Data Notice
+## 4. Controlled Scenario Simulation: Saïda High-Plateaux Event
 
-> **Important Disclosure**:
-> - The churn dataset is synthetically generated using rule-based behavioral probability distributions.
-> - The Gradient Boosting model achieved a validation ROC-AUC of 0.961 on this synthetic evaluation benchmark.
-> - **Performance on synthetic data does not imply identical performance on real operator production data.** Real-world telecom data includes non-stationary macro trends, competitive porting wars (MNP), promotional cannibalization, and noisy billing records.
+TelecomAI 2.0 includes a deterministic, reproducible degradation scenario:
+- **Wilaya**: Saïda (`DZ-20`)
+- **Infrastructure Impact**: 3 Sites, 7 Cells (e.g., `SITE-SAI-01`, `CELL-SAI-001`, `CELL-SAI-002`, `CELL-SAI-003`).
+- **Telemetry Deviation**: Latency surges by $+38\%$, packet loss increases by $+12\%$.
+- **Subscriber Exposure**: 1,284 affected subscribers, with 237 elevated to high churn risk.
+- **Revenue at Risk**: 12,500 DZD/month directly threatened.
+- **Priority Tier**: Auto-classified as **P1-CRITICAL** with 60-minute SLA countdown.
+- **Reset Capability**: Instant restoration to nominal baseline via `/api/simulation/reset`.
+
+---
+
+## 5. Scientific Transparency & Synthetic Data Disclosure
+
+> **Operational Notice**:
+> - All radio telemetry and customer behavior data in this repository is generated synthetically to provide a safe, reproducible operational intelligence environment.
+> - High model validation accuracy (e.g., ROC-AUC 0.961 on Gradient Boosting) demonstrates internal algorithmic consistency and effective feature synthesis, not empirical measurement on live operator networks.
+> - In live commercial deployments, data feeds must be connected via 3GPP Northbound PM/FM interfaces (e.g., Kafka / REST / SNMP) and BSS billing CDR collectors.
