@@ -75,6 +75,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <p className="text-slate-400 text-sm mt-0.5">AI-Powered Telecom & Customer Intelligence Platform</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded font-mono-num font-semibold">
+            Synthetic Calibrated Data
+          </span>
           <span className="px-2.5 py-1 bg-slate-800 text-slate-300 rounded font-mono-num">
             Algeria Region: North
           </span>
@@ -92,6 +95,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
       </header>
 
+      {/* Synthetic Data Notice Banner */}
+      <div className="bg-slate-900/70 border border-amber-500/30 rounded-lg px-3.5 py-2 flex items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2 text-amber-300">
+          <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px] font-mono-num">
+            DEMONSTRATOR
+          </span>
+          <span className="text-slate-300">
+            All telemetry metrics, revenue at risk (DZD), and regional statistics are derived from <strong>calibrated synthetic models</strong> for algorithmic evaluation.
+          </span>
+        </div>
+        <span className="text-[11px] text-slate-500 font-mono-num hidden sm:inline">No real operator PII</span>
+      </div>
+
       {/* Bento KPI Grid: 4 Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Network Health */}
@@ -100,7 +116,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           onClick={() => onNavigate('network')}
           className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between hover:border-slate-700 transition-colors cursor-pointer"
         >
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Network Health</span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Network Health</span>
+            <span className="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 font-mono">SYNTHETIC</span>
+          </div>
           <div className="flex items-baseline gap-2 my-2">
             <span className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono-num">{summary.networkHealth}%</span>
             <span className="text-[10px] text-emerald-500 font-medium">+0.2%</span>
@@ -118,7 +137,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           id="kpi-active-users"
           className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between"
         >
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Users</span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Users</span>
+            <span className="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 font-mono">SIMULATED</span>
+          </div>
           <div className="flex items-baseline gap-2 my-2">
             <span className="text-2xl sm:text-3xl font-bold text-white font-mono-num">
               {(summary.activeUsers / 1000).toFixed(1)}K
@@ -138,7 +160,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           onClick={() => onNavigate('customers')}
           className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between outline outline-1 outline-rose-500/30 hover:outline-rose-500/60 transition-colors cursor-pointer"
         >
-          <span className="text-xs font-semibold text-rose-400 uppercase tracking-wider">High Risk Churn</span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-rose-400 uppercase tracking-wider">High Risk Churn</span>
+            <span className="text-[9px] px-1 py-0.2 rounded bg-rose-500/20 text-rose-300 font-mono">SYNTHETIC DZD</span>
+          </div>
           <div className="flex items-baseline gap-2 my-2">
             <span className="text-2xl sm:text-3xl font-bold text-rose-500 font-mono-num">
               {summary.highRiskCustomers.toLocaleString()}
@@ -157,7 +182,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           onClick={() => onNavigate('network')}
           className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between outline outline-1 outline-amber-500/30 hover:outline-amber-500/60 transition-colors cursor-pointer"
         >
-          <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Anomalies</span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Anomalies</span>
+            <span className="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">SYNTHETIC</span>
+          </div>
           <div className="flex items-baseline gap-2 my-2">
             <span className="text-2xl sm:text-3xl font-bold text-amber-500 font-mono-num">{summary.networkAnomalies}</span>
             <span className="text-[10px] text-amber-400 font-medium">Active</span>

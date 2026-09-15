@@ -7,8 +7,8 @@ import {
   DashboardSummary
 } from '../types';
 // Placeholder shown only until the real summary loads from GET /api/dashboard/summary
-// (computed by scoring the full synthetic dataset with the trained models - see
-// backend/app/services/dashboard_service.py). Never treat these as real numbers.
+// (computed by scoring the full synthetic dataset with the ML scoring engine - see
+// server/mlService.ts). All metrics are prototype/synthetic.
 export const LOADING_DASHBOARD_SUMMARY: DashboardSummary = {
   networkHealth: 0,
   activeUsers: 0,

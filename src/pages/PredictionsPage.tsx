@@ -114,11 +114,7 @@ export const PredictionsPage: React.FC = () => {
       const result = await predictCustomerChurnApi(churnInputs);
       setChurnResult(result);
     } catch (err: any) {
-      setInferenceError(
-        err.message && err.message.includes('503')
-          ? 'ML model unavailable. Train the model first via: python3 ml/churn/train.py'
-          : err.message || 'Failed to reach the churn prediction API.'
-      );
+      setInferenceError(err.message || 'Failed to reach the churn prediction service.');
     } finally {
       setIsInferenceLoading(false);
     }
@@ -131,11 +127,7 @@ export const PredictionsPage: React.FC = () => {
       const result = await predictNetworkAnomalyApi(anomalyInputs);
       setAnomalyResult(result);
     } catch (err: any) {
-      setInferenceError(
-        err.message && err.message.includes('503')
-          ? 'Anomaly model unavailable. Train the model first via: python3 ml/anomaly/train.py'
-          : err.message || 'Failed to reach the anomaly prediction API.'
-      );
+      setInferenceError(err.message || 'Failed to reach the anomaly detection service.');
     } finally {
       setIsInferenceLoading(false);
     }
@@ -189,11 +181,16 @@ export const PredictionsPage: React.FC = () => {
       {/* Bento Header */}
       <header className="flex flex-col sm:flex-row sm:items-end justify-between pb-3 border-b border-slate-800 gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            AI Predictions & ML Benchmarks
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              AI Predictions & ML Benchmarks
+            </h1>
+            <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono-num font-semibold">
+              Synthetic Benchmarks
+            </span>
+          </div>
           <p className="text-slate-400 text-sm mt-0.5">
-            Model Evaluation, Confusion Matrices, SHAP Feature Importance & Interactive Testing
+            Model Evaluation, Confusion Matrices, SHAP Feature Importance & Interactive Testing (Evaluated on Calibrated Synthetic Cohorts)
           </p>
         </div>
 

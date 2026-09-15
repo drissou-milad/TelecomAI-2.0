@@ -160,9 +160,12 @@ export const NetworkPage: React.FC<NetworkPageProps> = ({
             <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
               Network Monitor (NOC)
             </h1>
+            <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono-num font-semibold">
+              Synthetic Telemetry
+            </span>
           </div>
           <p className="text-slate-400 text-sm mt-0.5">
-            Radio Access Network (RAN) Telemetry & Isolation Forest Anomaly Detection
+            Radio Access Network (RAN) Telemetry & Isolation Forest Anomaly Detection (Synthetic Algerian Topology)
           </p>
         </div>
 

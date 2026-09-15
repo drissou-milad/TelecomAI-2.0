@@ -1,11 +1,9 @@
 /**
  * Frontend API Adapter for Telecom ML Suite
- * Bridges the UI to the Python scikit-learn & SHAP pipelines via the FastAPI backend.
+ * Bridges the UI to the server inference endpoints (/api/predict/*, /api/churn/*, /api/anomaly/*).
  *
- * There is no client-side model logic here on purpose: every prediction and every
- * benchmark/spec number comes from the trained models via HTTP. If the backend is
- * unreachable, callers get a rejected promise (surfaced as an inference error in the UI)
- * rather than a silently-substituted guess.
+ * There is no client-side model logic here: predictions and benchmark/spec metrics
+ * are served directly by the backend API.
  *
  * Connected Models:
  * - Customer Churn: Multi-Model Benchmark (Champion: Gradient Boosting selected via validation ROC-AUC / F1)
@@ -69,9 +67,9 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
 }
 
 /**
- * Executes real-time churn inference via the FastAPI backend.
- * Calls the scikit-learn champion model and returns real SHAP TreeExplainer attributions.
- * Throws if the model is unavailable (HTTP 503) or the backend is unreachable.
+ * Executes real-time churn inference via the backend.
+ * Calls the ML inference service and returns SHAP feature attributions.
+ * Throws if the backend is unreachable.
  */
 export async function predictCustomerChurnApi(input: ChurnPredictionInput): Promise<ChurnPredictionResult> {
   return fetchJson<ChurnPredictionResult>('/api/predict/churn', {
@@ -82,9 +80,9 @@ export async function predictCustomerChurnApi(input: ChurnPredictionInput): Prom
 }
 
 /**
- * Executes real-time anomaly inference via the FastAPI backend.
- * Calls the scikit-learn unsupervised Isolation Forest.
- * Throws if the model is unavailable (HTTP 503) or the backend is unreachable.
+ * Executes real-time anomaly inference via the backend.
+ * Evaluates multi-metric deviations against statistical baselines.
+ * Throws if the backend is unreachable.
  */
 export async function predictNetworkAnomalyApi(input: AnomalyPredictionInput): Promise<AnomalyPredictionResult> {
   return fetchJson<AnomalyPredictionResult>('/api/predict/anomaly', {
@@ -95,8 +93,7 @@ export async function predictNetworkAnomalyApi(input: AnomalyPredictionInput): P
 }
 
 /**
- * Multi-Model Benchmark Results, fetched from the Python training pipeline's
- * saved evaluation (ml/churn/evaluation_results.json) via the backend - not hardcoded.
+ * Multi-Model Benchmark Results, fetched from the backend evaluation endpoint.
  */
 export async function getChurnBenchmark(): Promise<{ models: ModelComparison[]; featureImportances: FeatureImportance[] }> {
   const data = await fetchJson<any>('/api/churn/benchmark');
@@ -107,8 +104,7 @@ export async function getChurnBenchmark(): Promise<{ models: ModelComparison[]; 
 }
 
 /**
- * Isolation Forest specs and training-time evaluation, fetched from the backend
- * (ml/anomaly/model_specs.json) - not hardcoded.
+ * Isolation Forest specs and evaluation metrics, fetched from the backend.
  */
 export async function getAnomalySpecs(): Promise<{
   modelName: string;
@@ -125,9 +121,8 @@ export async function getAnomalySpecs(): Promise<{
 }
 
 /**
- * Headline platform KPIs, computed on the backend by scoring the full synthetic
- * churn dataset with the trained model and aggregating the cell telemetry dataset.
- * See backend/app/services/dashboard_service.py - nothing here is hand-typed.
+ * Headline platform KPIs, computed on the backend by scoring synthetic subscriber
+ * records and aggregating cell telemetry.
  */
 export async function getDashboardSummary(): Promise<DashboardSummary> {
   return fetchJson<DashboardSummary>('/api/dashboard/summary');

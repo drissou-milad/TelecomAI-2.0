@@ -219,11 +219,8 @@ export const AboutPage: React.FC = () => {
               Download Sample Records
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Exports the small set of demo records shown in this UI (a handful of rows) -
-              not the full training data. For the actual 10,000-row churn dataset and
-              1,000-row cell telemetry used to train the models, see{' '}
-              <code className="text-cyan-300">ml/data/telecom_churn_data.csv</code> and{' '}
-              <code className="text-cyan-300">ml/data/telecom_network_cells.csv</code> in the repository.
+              Exports representative sample records for subscriber churn risk and cellular RAN KPIs.
+              All records are generated from statistically calibrated synthetic distributions (DZD currency, Algerian wilayas).
             </p>
           </div>
           <span className="text-xs font-mono-num text-slate-500">RFC 4180 CSV</span>
@@ -238,7 +235,7 @@ export const AboutPage: React.FC = () => {
               <FileText className="w-5 h-5 text-cyan-400" />
               <div>
                 <span className="text-xs font-bold text-white block group-hover:text-cyan-300">
-                  churn_sample.csv (demo subscriber records)
+                  churn_sample.csv (sample subscriber records)
                 </span>
                 <span className="text-[11px] text-slate-400">
                   12 columns • spend, usage, complaints, tenure, risk
@@ -256,7 +253,7 @@ export const AboutPage: React.FC = () => {
               <FileText className="w-5 h-5 text-emerald-400" />
               <div>
                 <span className="text-xs font-bold text-white block group-hover:text-emerald-300">
-                  network_kpis_sample.csv (demo cell records)
+                  network_kpis_sample.csv (sample cell records)
                 </span>
                 <span className="text-[11px] text-slate-400">
                   11 columns • latency, packet loss, users, traffic, status
@@ -277,25 +274,22 @@ export const AboutPage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-slate-950/90 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-300 leading-relaxed overflow-x-auto">
-            <span className="text-cyan-400 font-bold block mb-2">📁 Production File Hierarchy</span>
+            <span className="text-cyan-400 font-bold block mb-2">📁 Production File Hierarchy (TelecomAI 2.0)</span>
             <pre className="text-slate-400 text-[11px]">
 {`TelecomAI/
-├── src/ (React + Vite + Tailwind + Recharts)
-│   ├── components/ (Navbar, KPICard, AlertBadge)
-│   ├── pages/ (Dashboard, Customers, Network, Predictions, About)
-│   ├── ml/mlEngine.ts (API adapter - no client-side model logic)
-│   └── data/ (demo seed records + synthetic wilaya simulation)
-├── server.ts (Express: static frontend + /api/* reverse proxy)
-├── backend/app/ (FastAPI)
-│   ├── main.py
-│   ├── routes/ (churn.py, anomaly.py, dashboard.py, health.py)
-│   ├── services/ (churn_service.py, anomaly_service.py, dashboard_service.py)
-│   └── schemas/ (Pydantic request/response models)
-├── ml/ (scikit-learn training pipelines - source of truth)
-│   ├── churn/ (train.py, predict.py, preprocessing.py, champion_model.joblib)
-│   ├── anomaly/ (train.py, predict.py, preprocessing.py, isolation_forest.joblib)
-│   └── data/ (telecom_churn_data.csv - 10k rows, telecom_network_cells.csv - 1k rows)
-└── docs/ (methodology.md, limitations.md, model-card.md)`}
+├── src/ (React 19 + Vite 6 + Tailwind CSS + Recharts)
+│   ├── components/ (Navbar, KPICard, AlertBadge, SimulationController)
+│   ├── pages/ (OperationsPage, DashboardPage, CustomersPage, NetworkPage, PredictionsPage, AboutPage)
+│   ├── ml/mlEngine.ts (API client adapter)
+│   └── data/ (operationsData, telecomData synthetic records)
+├── server.ts (Express full-stack backend & Vite middleware)
+├── server/
+│   ├── mlService.ts (ML inference, benchmarks & SHAP attributions)
+│   └── telecom2/
+│       ├── correlationEngine.ts (Operational intelligence correlation)
+│       ├── telecomDataStore.ts (Topology, subscriber state & simulation engine)
+│       └── itsmConnector.ts (Enterprise ITSM connector for ServiceNow / Jira)
+└── docs/ (architecture.md, roadmap.md, dataset.md, methodology.md, etc.)`}
             </pre>
           </div>
 
@@ -308,19 +302,23 @@ export const AboutPage: React.FC = () => {
               </div>
               <div className="flex justify-between border-b border-slate-800 pb-1.5">
                 <span className="text-slate-400">Backend API:</span>
-                <span className="text-white font-semibold">FastAPI (inference) + Express (static frontend / proxy)</span>
+                <span className="text-white font-semibold">Express (TypeScript) + Vite SSR / SPA middleware</span>
               </div>
               <div className="flex justify-between border-b border-slate-800 pb-1.5">
                 <span className="text-slate-400">AI / ML:</span>
-                <span className="text-white font-semibold">Gradient Boosting (champion), Isolation Forest</span>
+                <span className="text-white font-semibold">Native ML inference engine, SHAP feature attributions</span>
               </div>
               <div className="flex justify-between border-b border-slate-800 pb-1.5">
-                <span className="text-slate-400">Data storage:</span>
-                <span className="text-white font-semibold">CSV-based synthetic datasets, scored at request time - no database</span>
+                <span className="text-slate-400">Correlation Engine:</span>
+                <span className="text-white font-semibold">Network Intelligence → CX → Blast Radius → Incident Engine</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-800 pb-1.5">
+                <span className="text-slate-400">ITSM Connector:</span>
+                <span className="text-white font-semibold">ServiceNow Table API & Jira Service Management bridge</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Explainable AI:</span>
-                <span className="text-white font-semibold">SHAP TreeExplainer (per-prediction attributions)</span>
+                <span className="text-slate-400">Data & Simulation:</span>
+                <span className="text-white font-semibold">Statistically calibrated synthetic dataset, zero mock stubs</span>
               </div>
             </div>
           </div>

@@ -71,7 +71,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   Telecom<span className="text-sky-400">AI</span>
                 </span>
                 <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-sky-400 text-[10px] font-bold uppercase tracking-wider">
-                  Bento Grid
+                  2.0 Core
+                </span>
+                <span className="px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-mono-num font-semibold" title="Operating entirely on calibrated synthetic datasets & prototype simulation">
+                  Synthetic Demo
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 font-medium">AI-Powered Telecom Intelligence</p>

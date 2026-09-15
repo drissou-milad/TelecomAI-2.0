@@ -129,11 +129,16 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
       {/* Bento Header */}
       <header className="flex flex-col sm:flex-row sm:items-end justify-between pb-3 border-b border-slate-800 gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            Customer Intelligence & Churn
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              Customer Intelligence & Churn
+            </h1>
+            <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono-num font-semibold">
+              Synthetic Data
+            </span>
+          </div>
           <p className="text-slate-400 text-sm mt-0.5">
-            AI-Powered Attrition Scoring, Explainable AI Attributions & Automated VIP Retention
+            AI-Powered Attrition Scoring, Explainable AI Attributions & Automated VIP Retention (Synthetic Subscriber Cohort)
           </p>
         </div>
 
@@ -151,7 +156,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
             </div>
             <div className="h-5 w-px bg-slate-800" />
             <div>
-              <span className="text-[10px] text-slate-500 uppercase font-semibold">Revenue At Risk</span>
+              <span className="text-[10px] text-slate-500 uppercase font-semibold">Simulated Risk</span>
               <span className="text-rose-400 font-bold block">{(summary.revenueAtRiskDZD / 1_000_000).toFixed(1)}M DZD</span>
             </div>
           </div>

@@ -197,11 +197,14 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
               Operational Intelligence & ITSM Connector
             </h1>
             <span className="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 text-xs font-semibold">
-              v2.0 Phase 2
+              TelecomAI 2.0
+            </span>
+            <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30 text-xs font-mono-num font-semibold">
+              Synthetic Demonstrator
             </span>
           </div>
           <p className="text-slate-400 text-xs sm:text-sm mt-0.5">
-            Service Quality Management (SQM), Network-to-Customer Correlation & Automated ITSM Incident Dispatch
+            Service Quality Management (SQM), Network-to-Customer Correlation & Automated ITSM Incident Dispatch (All data synthetic/prototype-derived)
           </p>
         </div>
 
@@ -209,7 +212,7 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-900 border border-slate-800 rounded font-mono-num text-slate-300">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Connector: Active</span>
+            <span>ITSM Bridge: Active</span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1 bg-rose-500/10 border border-rose-500/20 rounded font-mono-num text-rose-400 font-bold">
             <span>{p1Count} P1 Incident{p1Count !== 1 ? 's' : ''} Open</span>
@@ -222,9 +225,12 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
         {/* Metric 1: Overall Customer Experience Score (CES) */}
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between">
           <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Customer Experience Index
-            </span>
+            <div>
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+                Customer Experience Index
+              </span>
+              <span className="text-[9px] text-slate-500 font-mono">SYNTHETIC CEI</span>
+            </div>
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
               GOOD (84.2%)
             </span>
@@ -242,9 +248,12 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
         {/* Metric 2: Impacted Subscribers */}
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between">
           <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Incident Blast Radius
-            </span>
+            <div>
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+                Incident Blast Radius
+              </span>
+              <span className="text-[9px] text-slate-500 font-mono">SYNTHETIC CORRELATION</span>
+            </div>
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold">
               Active Alerts
             </span>
@@ -264,9 +273,12 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
         {/* Metric 3: Revenue at Risk */}
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between">
           <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Monthly Revenue at Risk
-            </span>
+            <div>
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+                Monthly Revenue at Risk
+              </span>
+              <span className="text-[9px] text-slate-500 font-mono">SIMULATED EXPOSURE (DZD)</span>
+            </div>
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">
               RAN Impact
             </span>
@@ -286,9 +298,12 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
         {/* Metric 4: ITSM Dispatch Bridge */}
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between">
           <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              External ITSM Bridge
-            </span>
+            <div>
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+                External ITSM Bridge
+              </span>
+              <span className="text-[9px] text-slate-500 font-mono">STANDARDIZED SCHEMAS</span>
+            </div>
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 font-bold">
               eTOM / ITIL
             </span>
