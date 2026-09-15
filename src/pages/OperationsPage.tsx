@@ -55,6 +55,7 @@ interface OperationsPageProps {
   onNavigate: (page: string) => void;
   onSelectCell: (cellId: string) => void;
   onSelectCustomer: (customerId: string) => void;
+  onInspectIncident?: (incidentId: string) => void;
 }
 
 export const OperationsPage: React.FC<OperationsPageProps> = ({
@@ -66,7 +67,8 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
   onUpdateIncident,
   onNavigate,
   onSelectCell,
-  onSelectCustomer
+  onSelectCustomer,
+  onInspectIncident
 }) => {
   const [activeTab, setActiveTab] = useState<'incidents' | 'sqm_qos' | 'correlation' | 'itsm_connector'>('incidents');
   const [priorityFilter, setPriorityFilter] = useState<string>('ALL');
@@ -495,6 +497,15 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {onInspectIncident && (
+                    <button
+                      onClick={() => onInspectIncident(selectedIncident.id)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900 border border-indigo-700/50 text-indigo-300 font-bold text-xs transition cursor-pointer"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Deep Console & Evidence</span>
+                    </button>
+                  )}
                   <button
                     onClick={() => handleOpenDispatchModal(selectedIncident)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition-colors shadow-sm cursor-pointer"

@@ -1,4 +1,4 @@
-# TelecomAI 2.0 — Autonomous Telecom Operations & Customer Impact Intelligence Platform
+# TelecomAI 2.0 — AI-Powered Telecom Operations & Customer Impact Intelligence Platform
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.0-61dafb.svg)](https://react.dev/)
@@ -9,13 +9,15 @@
 
 An end-to-end, full-stack **Operational Intelligence Platform** designed for mobile network operators. TelecomAI 2.0 bridges physical Radio Access Network (RAN) telemetry with subscriber experience, business revenue risk, prioritized incident intelligence, and enterprise IT Service Management (ITSM) ticketing.
 
+> **Operational Scope Notice**: TelecomAI 2.0 operates as an AI-powered operational intelligence and decision-support system. It correlates multi-domain telemetry and produces actionable engineering playbooks and ITSM work orders; it does not directly actuate physical radio frequency transceivers or base station hardware without human-in-the-loop validation.
+
 ---
 
 ## 1. The Paradigm Shift: TelecomAI 1.0 ➔ TelecomAI 2.0
 
 | Architectural Dimension | TelecomAI 1.0 (Proof-of-Concept) | TelecomAI 2.0 (Operational Intelligence Platform) |
 | :--- | :--- | :--- |
-| **Operational Loop** | Passive prediction: static dashboard reporting. | Closed-loop autonomy: `Understand ➔ Correlate ➔ Prioritize ➔ Act`. |
+| **Operational Loop** | Passive prediction: static dashboard reporting. | Closed-loop decision support: `Understand ➔ Correlate ➔ Prioritize ➔ Act`. |
 | **Network & Customer Silos**| RAN anomalies and churn were scored in isolation. | **Cross-domain correlation**: maps degraded radio sectors directly to connected subscribers. |
 | **Impact Assessment** | Generic outlier percentages. | **Quantified blast radius**: calculates affected subscribers, VIP accounts, and monthly revenue at risk (DZD). |
 | **Incident Management** | Raw alarms per individual cell sector. | **Incident deduplication**: clusters multi-sector alarms into canonical incidents with dynamic P1–P4 SLA timers. |

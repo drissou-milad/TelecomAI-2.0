@@ -13,7 +13,8 @@ import {
   DollarSign,
   Info,
   X,
-  Send
+  Send,
+  Sliders
 } from 'lucide-react';
 
 interface SimulationStatus {
@@ -69,11 +70,13 @@ interface CorrelationResult {
 interface SimulationControllerProps {
   onRefreshAll?: () => void;
   onNavigateToOperations?: () => void;
+  onOpenScenarioCenter?: () => void;
 }
 
 export const SimulationController: React.FC<SimulationControllerProps> = ({
   onRefreshAll,
-  onNavigateToOperations
+  onNavigateToOperations,
+  onOpenScenarioCenter
 }) => {
   const [status, setStatus] = useState<SimulationStatus>({
     isActive: true,
@@ -298,6 +301,17 @@ export const SimulationController: React.FC<SimulationControllerProps> = ({
               <Sparkles className={`w-3.5 h-3.5 ${loadingAction === 'analyze' ? 'animate-spin' : ''}`} />
               <span>Inspect AI Operational Loop</span>
             </button>
+
+            {onOpenScenarioCenter && (
+              <button
+                onClick={onOpenScenarioCenter}
+                id="btn-sim-open-scenario-center"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-700/50 text-xs font-semibold rounded-lg transition cursor-pointer"
+              >
+                <Sliders className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Scenario Center</span>
+              </button>
+            )}
           </div>
         </div>
 

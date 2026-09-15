@@ -29,6 +29,10 @@ import {
   resetSimulation,
   getSimulationStatus,
   getModelPerformanceSpecs,
+  getAuditEvents,
+  addAuditEvent,
+  simulateScenario,
+  getIncidentAnalytics,
 } from './server/telecom2/telecomDataStore';
 import { itsmConnector } from './server/telecom2/itsmConnector';
 
@@ -368,6 +372,38 @@ app.get(['/api/simulation/status', '/simulation/status'], (_req, res) => {
     res.json(status);
   } catch (err: any) {
     res.status(500).json({ error: `Simulation status error: ${err.message}` });
+  }
+});
+
+// 26. Multi-Scenario Simulation Engine
+app.post(['/api/simulation/scenario', '/simulation/scenario'], (req, res) => {
+  try {
+    const result = simulateScenario(req.body);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: `Scenario simulation error: ${err.message}` });
+  }
+});
+
+// 27. Real-Time Operations Event / Audit Stream
+app.get(['/api/events', '/events'], (req, res) => {
+  try {
+    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit, 10) : 50;
+    const filterType = typeof req.query.type === 'string' ? req.query.type : undefined;
+    const events = getAuditEvents(limit, filterType);
+    res.json({ events, count: events.length });
+  } catch (err: any) {
+    res.status(500).json({ error: `Error fetching audit events: ${err.message}` });
+  }
+});
+
+// 28. Historical Incident Analytics (MTTR, distribution, recurring causes)
+app.get(['/api/incidents/analytics', '/incidents/analytics'], (_req, res) => {
+  try {
+    const analytics = getIncidentAnalytics();
+    res.json(analytics);
+  } catch (err: any) {
+    res.status(500).json({ error: `Error fetching incident analytics: ${err.message}` });
   }
 });
 

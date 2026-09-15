@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { SimulationController } from './components/SimulationController';
+import { NOCHeader } from './components/NOCHeader';
+import { LiveEventFeed } from './components/LiveEventFeed';
+import { ScenarioCenter } from './components/ScenarioCenter';
+import { IncidentAnalyticsModal } from './components/IncidentAnalyticsModal';
+import { IncidentDetailModal } from './components/IncidentDetailModal';
+import { InteractiveCausalChain } from './components/InteractiveCausalChain';
 import { DashboardPage } from './pages/DashboardPage';
 import { OperationsPage } from './pages/OperationsPage';
 import { CustomersPage } from './pages/CustomersPage';
@@ -46,8 +52,25 @@ export default function App() {
   const [championModel, setChampionModel] = useState<ModelComparison | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('C10245');
   const [selectedCellId, setSelectedCellId] = useState<string>('CELL-TLM-034');
+  const [isScenarioCenterOpen, setIsScenarioCenterOpen] = useState<boolean>(false);
+  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState<boolean>(false);
+  const [isEventFeedOpen, setIsEventFeedOpen] = useState<boolean>(false);
+  const [selectedIncidentForModal, setSelectedIncidentForModal] = useState<TelecomIncident | null>(null);
+  const [lastUpdatedTime, setLastUpdatedTime] = useState<string>(new Date().toLocaleTimeString());
+
+  const handleOpenIncidentDetail = (incidentId?: string) => {
+    if (incidentId) {
+      const found = incidents.find(i => i.id === incidentId);
+      if (found) {
+        setSelectedIncidentForModal(found);
+        return;
+      }
+    }
+    setSelectedIncidentForModal(incidents[0] || null);
+  };
 
   const handleRefreshAllData = async () => {
+    setLastUpdatedTime(new Date().toLocaleTimeString());
     try {
       const [overviewRes, cellsRes, incidentsRes] = await Promise.all([
         fetch('/api/network/overview'),
@@ -190,10 +213,44 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Real-Time Operations NOC Console Bar */}
+        <NOCHeader
+          networkHealth={summary.networkHealth}
+          activeAnomalies={cells.filter(c => c.status === 'anomaly').length}
+          affectedCustomers={activeP1Count > 0 ? 1284 : 0}
+          revenueAtRiskDZD={summary.revenueAtRiskDZD}
+          openIncidentsCount={incidents.filter(i => i.status !== 'RESOLVED').length}
+          activeP1Count={activeP1Count}
+          lastUpdated={lastUpdatedTime}
+          onManualRefresh={handleRefreshAllData}
+          onOpenScenarioCenter={() => setIsScenarioCenterOpen(true)}
+          onOpenAnalytics={() => setIsAnalyticsModalOpen(true)}
+          onToggleEventFeed={() => setIsEventFeedOpen(prev => !prev)}
+          isEventFeedOpen={isEventFeedOpen}
+        />
+
+        {/* Live Operational Audit Feed (collapsible stream) */}
+        {isEventFeedOpen && (
+          <LiveEventFeed 
+            onClose={() => setIsEventFeedOpen(false)}
+            onSelectIncident={handleOpenIncidentDetail}
+          />
+        )}
+
+        {/* Closed-Loop Interactive Causal Chain Demonstrator */}
+        {(activePage === 'dashboard' || activePage === 'operations') && (
+          <InteractiveCausalChain
+            onOpenIncidentDetail={() => handleOpenIncidentDetail('INC-0001')}
+            onOpenScenarioCenter={() => setIsScenarioCenterOpen(true)}
+            onNavigateToOperations={() => handleNavigate('operations')}
+          />
+        )}
+
         {/* TelecomAI 2.0 Simulation & Operational Loop Controller */}
         <SimulationController
           onRefreshAll={handleRefreshAllData}
           onNavigateToOperations={() => handleNavigate('operations')}
+          onOpenScenarioCenter={() => setIsScenarioCenterOpen(true)}
         />
 
         {activePage === 'dashboard' && (
@@ -233,6 +290,7 @@ export default function App() {
               setSelectedCustomerId(id);
               handleNavigate('customers');
             }}
+            onInspectIncident={handleOpenIncidentDetail}
           />
         )}
 
@@ -264,6 +322,30 @@ export default function App() {
           <AboutPage />
         )}
       </main>
+
+      {/* Modals & Dialogs */}
+      <ScenarioCenter
+        isOpen={isScenarioCenterOpen}
+        onClose={() => setIsScenarioCenterOpen(false)}
+        onScenarioApplied={() => handleRefreshAllData()}
+      />
+
+      <IncidentAnalyticsModal
+        isOpen={isAnalyticsModalOpen}
+        onClose={() => setIsAnalyticsModalOpen(false)}
+      />
+
+      <IncidentDetailModal
+        incident={selectedIncidentForModal}
+        isOpen={!!selectedIncidentForModal}
+        onClose={() => setSelectedIncidentForModal(null)}
+        onUpdateStatus={(id, status) => {
+          setIncidents(prev => prev.map(i => i.id === id ? { ...i, status: status as any } : i));
+          if (selectedIncidentForModal) {
+            setSelectedIncidentForModal(prev => prev ? { ...prev, status: status as any } : null);
+          }
+        }}
+      />
 
       {/* Bottom Bento Telecom Status & Compliance Footer */}
       <footer className="border-t border-slate-800 bg-slate-900/50 mt-auto py-5 text-xs text-slate-500">

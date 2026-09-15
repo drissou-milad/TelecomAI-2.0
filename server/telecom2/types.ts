@@ -230,14 +230,113 @@ export interface ITSMTicket {
 // 5. SIMULATION CONTRACTS
 // ==========================================
 
+export type ScenarioType =
+  | 'nominal'
+  | 'cell_congestion'
+  | 'backhaul_degradation'
+  | 'high_latency'
+  | 'packet_loss'
+  | 'site_outage'
+  | 'regional_degradation';
+
 export interface SimulationState {
   isActive: boolean;
   scenarioName: string;
+  scenarioType?: ScenarioType;
+  severityLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   targetWilaya: string;
   degradedCellCount: number;
   simulatedIncidentId: string;
   startedAt: string | null;
   currentAnomalyCount: number;
+}
+
+export interface ScenarioRequest {
+  scenario: ScenarioType;
+  severity?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  wilaya?: string;
+}
+
+// ==========================================
+// 5B. AUDIT EVENT LOG CONTRACTS
+// ==========================================
+
+export type AuditEventType =
+  | 'ANOMALY_DETECTED'
+  | 'IMPACT_CALCULATED'
+  | 'INCIDENT_CREATED'
+  | 'PRIORITY_ASSIGNED'
+  | 'AI_ANALYSIS_COMPLETED'
+  | 'RECOMMENDATION_GENERATED'
+  | 'ITSM_WORK_ORDER_CREATED'
+  | 'SIMULATION_TRIGGERED'
+  | 'SIMULATION_RESET'
+  | 'ENGINEERING_DISPATCHED';
+
+export interface AuditLogEvent {
+  id: string;
+  timestamp: string; // ISO format
+  timeString: string; // HH:MM:SS format
+  eventType: AuditEventType;
+  entityId: string;
+  details: string;
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO';
+  metadata?: Record<string, any>;
+}
+
+// ==========================================
+// 5C. INCIDENT ANALYTICS CONTRACTS
+// ==========================================
+
+export interface IncidentAnalytics {
+  totalIncidents: number;
+  openIncidents: number;
+  resolvedIncidents: number;
+  mttrMinutes: {
+    overall: number;
+    p1: number;
+    p2: number;
+    p3: number;
+    p4: number;
+  };
+  severityDistribution: {
+    p1: number;
+    p2: number;
+    p3: number;
+    p4: number;
+  };
+  dailyTrend: {
+    date: string;
+    day: string;
+    incidents: number;
+    affectedCustomers: number;
+    revenueRiskDZD: number;
+  }[];
+  topProblematicSites: {
+    siteId: string;
+    siteName: string;
+    wilaya: string;
+    incidentCount: number;
+    healthScore: number;
+  }[];
+  topProblematicCells: {
+    cellId: string;
+    siteName: string;
+    wilaya: string;
+    anomalyFrequency: number;
+    lastIncident: string;
+  }[];
+  incidentsByWilaya: {
+    wilaya: string;
+    count: number;
+    p1Count: number;
+    status: string;
+  }[];
+  recurringRootCauses: {
+    type: string;
+    count: number;
+    pctOfTotal: number;
+  }[];
 }
 
 // ==========================================

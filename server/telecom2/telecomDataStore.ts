@@ -1,4 +1,17 @@
-import { Wilaya, Site, Cell, Customer2, Incident2, CustomerExperienceIndex, SimulationState } from './types';
+import { 
+  Wilaya, 
+  Site, 
+  Cell, 
+  Customer2, 
+  Incident2, 
+  CustomerExperienceIndex, 
+  SimulationState,
+  ScenarioType,
+  ScenarioRequest,
+  AuditLogEvent,
+  AuditEventType,
+  IncidentAnalytics
+} from './types';
 
 // ==========================================
 // 1. WILAYAS (ALGERIAN REGIONS)
@@ -1178,12 +1191,52 @@ export function simulateDegradation(wilaya: string = 'Saida'): { status: string;
   simulationState = {
     isActive: true,
     scenarioName: `${wilaya} Transport Backhaul Congestion`,
+    scenarioType: 'backhaul_degradation',
+    severityLevel: 'CRITICAL',
     targetWilaya: wilaya,
     degradedCellCount: activeCells.filter(c => c.wilaya.toLowerCase() === wilaya.toLowerCase()).length,
     simulatedIncidentId: 'INC-0001',
     startedAt: new Date().toISOString(),
     currentAnomalyCount: activeCells.filter(c => c.status === 'anomaly').length,
   };
+
+  // Add audit events reflecting the causal chain
+  addAuditEvent(
+    'SIMULATION_TRIGGERED',
+    'SIMULATOR',
+    `Injected ${wilaya} backhaul degradation scenario into live telemetry bus`,
+    'HIGH'
+  );
+  addAuditEvent(
+    'ANOMALY_DETECTED',
+    'CELL-SAI-001A',
+    `Isolation Forest detected +38% transport latency anomaly on Saïda cell cluster`,
+    'CRITICAL'
+  );
+  addAuditEvent(
+    'IMPACT_CALCULATED',
+    'SAIDA_FOOTPRINT',
+    `Spatial correlation identified 1,284 affected subscribers & 12,500 DZD revenue at risk`,
+    'HIGH'
+  );
+  addAuditEvent(
+    'INCIDENT_CREATED',
+    'INC-0001',
+    `Canonical incident INC-0001 created for 7 degraded radio sectors`,
+    'CRITICAL'
+  );
+  addAuditEvent(
+    'PRIORITY_ASSIGNED',
+    'INC-0001',
+    `P1-CRITICAL priority assigned (Score: 87/100, SLA: 60m)`,
+    'CRITICAL'
+  );
+  addAuditEvent(
+    'AI_ANALYSIS_COMPLETED',
+    'INC-0001',
+    `6-Question operational assessment generated (Confidence: 84%)`,
+    'INFO'
+  );
 
   return {
     status: 'Degradation simulation initiated successfully',
@@ -1220,12 +1273,21 @@ export function resetSimulation(): { status: string; simulation: SimulationState
   simulationState = {
     isActive: false,
     scenarioName: 'Nominal Operations',
+    scenarioType: 'nominal',
+    severityLevel: 'LOW',
     targetWilaya: 'None',
     degradedCellCount: 0,
     simulatedIncidentId: '',
     startedAt: null,
     currentAnomalyCount: 0,
   };
+
+  addAuditEvent(
+    'SIMULATION_RESET',
+    'SIMULATOR',
+    'All cellular radio sectors, base stations and backhaul links restored to nominal baseline',
+    'INFO'
+  );
 
   return {
     status: 'Simulation reset: All network cells restored to nominal baseline',
@@ -1235,6 +1297,303 @@ export function resetSimulation(): { status: string; simulation: SimulationState
 
 export function getSimulationStatus(): SimulationState {
   return simulationState;
+}
+
+// ==========================================
+// 8B. AUDIT & EVENT LOG STORE
+// ==========================================
+
+const formatTime = (date: Date) => {
+  return date.toTimeString().split(' ')[0];
+};
+
+const initialTime = Date.now();
+
+let AUDIT_LOGS: AuditLogEvent[] = [
+  {
+    id: 'evt-001',
+    timestamp: new Date(initialTime - 12 * 60 * 1000).toISOString(),
+    timeString: formatTime(new Date(initialTime - 12 * 60 * 1000)),
+    eventType: 'ANOMALY_DETECTED',
+    entityId: 'CELL-SAI-001A',
+    details: 'Isolation Forest flagged latency spike (+38%) & PRB saturation (88.5%) on 1800MHz carrier',
+    severity: 'HIGH',
+    metadata: { latencyMs: 29.2, baselineMs: 21.1, packetLossPct: 3.56 },
+  },
+  {
+    id: 'evt-002',
+    timestamp: new Date(initialTime - 11 * 60 * 1000).toISOString(),
+    timeString: formatTime(new Date(initialTime - 11 * 60 * 1000)),
+    eventType: 'IMPACT_CALCULATED',
+    entityId: 'SAIDA_CLUSTER',
+    details: 'Topological correlation identified 1,284 affected subscribers (237 high churn risk) and 12,500 DZD revenue at risk',
+    severity: 'HIGH',
+    metadata: { affectedSubscribers: 1284, highRiskCount: 237, revenueAtRiskDZD: 12500 },
+  },
+  {
+    id: 'evt-003',
+    timestamp: new Date(initialTime - 11 * 60 * 1000).toISOString(),
+    timeString: formatTime(new Date(initialTime - 11 * 60 * 1000)),
+    eventType: 'INCIDENT_CREATED',
+    entityId: 'INC-0001',
+    details: 'Canonical incident INC-0001 created: Regional Network Degradation - Saïda (3 sites, 7 cells)',
+    severity: 'CRITICAL',
+    metadata: { sites: 3, cells: 7, wilaya: 'Saida' },
+  },
+  {
+    id: 'evt-004',
+    timestamp: new Date(initialTime - 10 * 60 * 1000).toISOString(),
+    timeString: formatTime(new Date(initialTime - 10 * 60 * 1000)),
+    eventType: 'PRIORITY_ASSIGNED',
+    entityId: 'INC-0001',
+    details: 'Priority scored as P1-CRITICAL (Score: 87/100, SLA: 60m) based on customer exposure & revenue at risk',
+    severity: 'CRITICAL',
+    metadata: { priority: 'P1', priorityScore: 87, slaMinutes: 60 },
+  },
+  {
+    id: 'evt-005',
+    timestamp: new Date(initialTime - 9 * 60 * 1000).toISOString(),
+    timeString: formatTime(new Date(initialTime - 9 * 60 * 1000)),
+    eventType: 'AI_ANALYSIS_COMPLETED',
+    entityId: 'INC-0001',
+    details: '6-Question root cause brief compiled with 84% confidence. Root cause: Microwave backhaul hop RSSI degradation',
+    severity: 'INFO',
+    metadata: { confidence: 0.84, primaryRootCause: 'Microwave Backhaul Congestion' },
+  },
+  {
+    id: 'evt-006',
+    timestamp: new Date(initialTime - 8 * 60 * 1000).toISOString(),
+    timeString: formatTime(new Date(initialTime - 8 * 60 * 1000)),
+    eventType: 'ITSM_WORK_ORDER_CREATED',
+    entityId: 'INC-SNOW-89421',
+    details: 'ServiceNow ticket dispatched to RAN_ENGINEERING_TIER_2 with eTOM/ITIL operational evidence payload',
+    severity: 'INFO',
+    metadata: { system: 'ServiceNow', ticketId: 'INC-SNOW-89421' },
+  },
+];
+
+export function addAuditEvent(
+  eventType: AuditEventType,
+  entityId: string,
+  details: string,
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO' = 'INFO',
+  metadata?: Record<string, any>
+): AuditLogEvent {
+  const d = new Date();
+  const newEvt: AuditLogEvent = {
+    id: `evt-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+    timestamp: d.toISOString(),
+    timeString: formatTime(d),
+    eventType,
+    entityId,
+    details,
+    severity,
+    metadata,
+  };
+  AUDIT_LOGS.unshift(newEvt);
+  if (AUDIT_LOGS.length > 250) {
+    AUDIT_LOGS = AUDIT_LOGS.slice(0, 250);
+  }
+  return newEvt;
+}
+
+export function getAuditEvents(limit: number = 50, filterType?: string): AuditLogEvent[] {
+  let list = AUDIT_LOGS;
+  if (filterType && filterType !== 'ALL') {
+    list = list.filter(e => e.eventType === filterType);
+  }
+  return list.slice(0, limit);
+}
+
+// ==========================================
+// 8C. MULTI-SCENARIO SIMULATOR
+// ==========================================
+
+export function simulateScenario(req: ScenarioRequest): { status: string; simulation: SimulationState } {
+  const wilaya = req.wilaya || 'Saida';
+  const severity = req.severity || 'CRITICAL';
+  const scenarioType = req.scenario || 'backhaul_degradation';
+
+  if (scenarioType === 'nominal') {
+    return resetSimulation();
+  }
+
+  // Calculate severity multipliers
+  const sevMultiplier = severity === 'CRITICAL' ? 1.5 : severity === 'HIGH' ? 1.25 : severity === 'MEDIUM' ? 1.1 : 1.05;
+
+  activeCells = activeCells.map(c => {
+    if (c.wilaya.toLowerCase() === wilaya.toLowerCase()) {
+      let lat = c.nominalBaseline.latencyMs;
+      let loss = c.nominalBaseline.packetLossPct;
+      let avail = c.nominalBaseline.availabilityPct;
+      let prb = c.nominalBaseline.prbUtilizationPct;
+
+      switch (scenarioType) {
+        case 'cell_congestion':
+          prb = Math.min(96, Number((prb * 1.8 * sevMultiplier).toFixed(1)));
+          lat = Number((lat * 1.25 * sevMultiplier).toFixed(1));
+          loss = Number((loss + 2.1 * sevMultiplier).toFixed(1));
+          break;
+        case 'backhaul_degradation':
+          lat = Number((lat * 1.38 * sevMultiplier).toFixed(1));
+          loss = Number((loss + 3.4 * sevMultiplier).toFixed(1));
+          avail = 93.8;
+          prb = 88.5;
+          break;
+        case 'high_latency':
+          lat = Number((lat * 1.65 * sevMultiplier).toFixed(1));
+          loss = Number((loss + 1.2).toFixed(1));
+          break;
+        case 'packet_loss':
+          loss = Number((loss + 4.8 * sevMultiplier).toFixed(1));
+          lat = Number((lat * 1.18).toFixed(1));
+          break;
+        case 'site_outage':
+          avail = 14.5;
+          loss = 18.2;
+          lat = 115.0;
+          prb = 15.0;
+          break;
+        case 'regional_degradation':
+          lat = Number((lat * 1.5 * sevMultiplier).toFixed(1));
+          loss = Number((loss + 3.8 * sevMultiplier).toFixed(1));
+          avail = 89.0;
+          prb = 92.0;
+          break;
+      }
+
+      return {
+        ...c,
+        status: 'anomaly' as const,
+        currentTelemetry: {
+          ...c.currentTelemetry,
+          latencyMs: lat,
+          packetLossPct: loss,
+          availabilityPct: avail,
+          prbUtilizationPct: prb,
+        },
+      };
+    }
+    return c;
+  });
+
+  activeSites = activeSites.map(s => {
+    if (s.wilaya.toLowerCase() === wilaya.toLowerCase()) {
+      return {
+        ...s,
+        status: 'anomaly' as const,
+        healthScore: scenarioType === 'site_outage' ? 24 : 58,
+      };
+    }
+    return s;
+  });
+
+  const scenarioTitles: Record<ScenarioType, string> = {
+    nominal: 'Nominal Operations',
+    cell_congestion: `${wilaya} Sector PRB Capacity Saturation`,
+    backhaul_degradation: `${wilaya} Microwave Backhaul Congestion`,
+    high_latency: `${wilaya} Transport Jitter & Latency Surge`,
+    packet_loss: `${wilaya} RF Jumper Drift & Frame Discard`,
+    site_outage: `${wilaya} Primary Rectifier Power Outage`,
+    regional_degradation: `${wilaya} Metropolitan Cluster Degradation`,
+  };
+
+  const scenarioTitle = scenarioTitles[scenarioType] || `${wilaya} Injected Degradation`;
+
+  // Update or re-open incident
+  const inc0001 = INCIDENTS_DB.find(i => i.incident_id === 'INC-0001');
+  if (inc0001) {
+    inc0001.status = 'INVESTIGATING';
+    inc0001.title = `Regional Incident: ${scenarioTitle}`;
+    inc0001.priority = severity === 'CRITICAL' ? 'P1' : severity === 'HIGH' ? 'P2' : 'P3';
+  }
+
+  simulationState = {
+    isActive: true,
+    scenarioName: scenarioTitle,
+    scenarioType,
+    severityLevel: severity,
+    targetWilaya: wilaya,
+    degradedCellCount: activeCells.filter(c => c.wilaya.toLowerCase() === wilaya.toLowerCase()).length,
+    simulatedIncidentId: 'INC-0001',
+    startedAt: new Date().toISOString(),
+    currentAnomalyCount: activeCells.filter(c => c.status === 'anomaly').length,
+  };
+
+  // Add the sequence of causal audit events
+  addAuditEvent('SIMULATION_TRIGGERED', 'SCENARIO_CENTER', `Scenario launched: ${scenarioTitle} (${severity} severity)`, 'HIGH');
+  addAuditEvent('ANOMALY_DETECTED', `RAN-${wilaya.toUpperCase()}`, `Anomaly vector detected across ${wilaya} radio carrier sectors`, 'HIGH');
+  addAuditEvent('IMPACT_CALCULATED', 'BLAST_RADIUS', `Impact evaluated: 1,284 subscribers exposed, 12,500 DZD revenue at risk`, 'HIGH');
+  addAuditEvent('INCIDENT_CREATED', 'INC-0001', `Operational incident registered: ${scenarioTitle}`, 'CRITICAL');
+  addAuditEvent('PRIORITY_ASSIGNED', 'INC-0001', `Assigned priority ${simulationState.severityLevel === 'CRITICAL' ? 'P1' : 'P2'} based on revenue & VIP weighting`, 'CRITICAL');
+  addAuditEvent('AI_ANALYSIS_COMPLETED', 'INC-0001', `Generated root-cause diagnosis and engineering mitigation playbook`, 'INFO');
+  addAuditEvent('RECOMMENDATION_GENERATED', 'PLAYBOOK', `Recommended: Dynamic carrier offload and automated link failover`, 'INFO');
+
+  return {
+    status: `Scenario '${scenarioTitle}' initiated successfully`,
+    simulation: simulationState,
+  };
+}
+
+// ==========================================
+// 8D. INCIDENT ANALYTICS SERVICE
+// ==========================================
+
+export function getIncidentAnalytics(): IncidentAnalytics {
+  const openCount = INCIDENTS_DB.filter(i => i.status !== 'RESOLVED').length;
+
+  return {
+    totalIncidents: 14,
+    openIncidents: openCount,
+    resolvedIncidents: 14 - openCount,
+    mttrMinutes: {
+      overall: 58,
+      p1: 42,
+      p2: 115,
+      p3: 240,
+      p4: 480,
+    },
+    severityDistribution: {
+      p1: INCIDENTS_DB.filter(i => i.priority === 'P1').length,
+      p2: INCIDENTS_DB.filter(i => i.priority === 'P2').length + 2,
+      p3: INCIDENTS_DB.filter(i => i.priority === 'P3').length + 4,
+      p4: 2,
+    },
+    dailyTrend: [
+      { date: '2026-09-09', day: 'Wed', incidents: 1, affectedCustomers: 320, revenueRiskDZD: 3100 },
+      { date: '2026-09-10', day: 'Thu', incidents: 2, affectedCustomers: 540, revenueRiskDZD: 5200 },
+      { date: '2026-09-11', day: 'Fri', incidents: 1, affectedCustomers: 180, revenueRiskDZD: 1900 },
+      { date: '2026-09-12', day: 'Sat', incidents: 3, affectedCustomers: 890, revenueRiskDZD: 8400 },
+      { date: '2026-09-13', day: 'Sun', incidents: 2, affectedCustomers: 620, revenueRiskDZD: 6100 },
+      { date: '2026-09-14', day: 'Mon', incidents: 2, affectedCustomers: 710, revenueRiskDZD: 7200 },
+      { date: '2026-09-15', day: 'Tue', incidents: openCount + 1, affectedCustomers: 1284, revenueRiskDZD: 12500 },
+    ],
+    topProblematicSites: [
+      { siteId: 'SITE-SAI-001', siteName: 'Saïda Centre Ville', wilaya: 'Saida', incidentCount: 4, healthScore: 61 },
+      { siteId: 'SITE-TLM-001', siteName: 'Mansourah Central', wilaya: 'Tlemcen', incidentCount: 3, healthScore: 78 },
+      { siteId: 'SITE-ORA-001', siteName: 'Akid Lotfi Marina', wilaya: 'Oran', incidentCount: 2, healthScore: 92 },
+      { siteId: 'SITE-SAI-003', siteName: 'El Hassasna Backhaul Hub', wilaya: 'Saida', incidentCount: 2, healthScore: 64 },
+    ],
+    topProblematicCells: [
+      { cellId: 'CELL-SAI-001A', siteName: 'Saïda Centre Ville', wilaya: 'Saida', anomalyFrequency: 5, lastIncident: 'INC-0001' },
+      { cellId: 'CELL-SAI-002A', siteName: 'Saïda Nord Ind Zone', wilaya: 'Saida', anomalyFrequency: 3, lastIncident: 'INC-0001' },
+      { cellId: 'CELL-TLM-001A', siteName: 'Mansourah Central', wilaya: 'Tlemcen', anomalyFrequency: 3, lastIncident: 'INC-0002' },
+      { cellId: 'CELL-ORA-001A', siteName: 'Akid Lotfi Marina', wilaya: 'Oran', anomalyFrequency: 2, lastIncident: 'INC-0003' },
+    ],
+    incidentsByWilaya: [
+      { wilaya: 'Saida', count: 5, p1Count: 2, status: 'ELEVATED' },
+      { wilaya: 'Tlemcen', count: 3, p1Count: 0, status: 'MODERATE' },
+      { wilaya: 'Oran', count: 3, p1Count: 1, status: 'MONITORED' },
+      { wilaya: 'Algiers', count: 2, p1Count: 0, status: 'STABLE' },
+      { wilaya: 'Constantine', count: 1, p1Count: 0, status: 'STABLE' },
+    ],
+    recurringRootCauses: [
+      { type: 'Microwave Backhaul Transport Congestion', count: 6, pctOfTotal: 43 },
+      { type: 'VSWR RF Antenna Return Loss Drift', count: 3, pctOfTotal: 21 },
+      { type: 'Baseband PRB Physical Layer Saturation', count: 3, pctOfTotal: 21 },
+      { type: 'Fiber Transport Intermediate Jitter', count: 2, pctOfTotal: 15 },
+    ],
+  };
 }
 
 // ==========================================
