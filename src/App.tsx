@@ -13,6 +13,7 @@ import { CustomersPage } from './pages/CustomersPage';
 import { NetworkPage } from './pages/NetworkPage';
 import { PredictionsPage } from './pages/PredictionsPage';
 import { AboutPage } from './pages/AboutPage';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 import { 
   SEED_CUSTOMERS, 
@@ -91,25 +92,37 @@ export default function App() {
       if (cellsRes.ok) {
         const { cells: apiCells } = await cellsRes.json();
         if (apiCells && apiCells.length > 0) {
-          const mappedCells: NetworkCell[] = apiCells.map((c: any) => ({
-            cellId: c.cellId,
-            siteId: c.siteId,
-            siteName: c.siteName,
-            wilaya: c.wilaya,
-            technology: c.technology,
-            frequencyBand: c.frequencyBand,
-            azimuthDeg: c.azimuthDeg,
-            status: c.status,
-            healthScore: c.healthScore,
-            users: c.currentTelemetry.connectedUsers,
-            latencyMs: c.currentTelemetry.latencyMs,
-            packetLossPct: c.currentTelemetry.packetLossPct,
-            trafficMbps: c.currentTelemetry.trafficMbps,
-            availabilityPct: c.currentTelemetry.availabilityPct,
-            activeAlarms: c.activeAlarms,
-            anomalyScore: c.status === 'anomaly' ? 84 : 12,
-            anomalyReason: c.status === 'anomaly' ? 'Surge in packet loss and latency above regional baseline' : undefined
-          }));
+          const mappedCells: NetworkCell[] = apiCells.map((c: any) => {
+            const seedMatch = SEED_NETWORK_CELLS.find(sc => sc.cellId === c.cellId);
+            const isAnomaly = c.status === 'anomaly';
+            const isWarning = c.status === 'warning';
+
+            return {
+              cellId: c.cellId,
+              siteId: c.siteId || seedMatch?.siteId || 'SITE-001',
+              siteName: c.siteName || seedMatch?.siteName || 'Cell Sector',
+              wilaya: c.wilaya || seedMatch?.wilaya || 'Algiers',
+              technology: (c.technology === '5G-NR' || c.technology === '5G NR') ? '5G NR' : '4G LTE',
+              frequencyBand: c.frequencyBand || seedMatch?.frequencyBand || '1800 MHz',
+              azimuthDeg: c.azimuthDeg ?? c.azimuth ?? 0,
+              status: (c.status || 'normal') as 'normal' | 'warning' | 'anomaly',
+              healthScore: c.healthScore ?? (isAnomaly ? 38 : isWarning ? 74 : 96),
+              users: c.currentTelemetry?.users ?? c.currentTelemetry?.connectedUsers ?? seedMatch?.users ?? 450,
+              latencyMs: c.currentTelemetry?.latencyMs ?? seedMatch?.latencyMs ?? 32,
+              packetLossPct: c.currentTelemetry?.packetLossPct ?? seedMatch?.packetLossPct ?? 0.6,
+              trafficMbps: c.currentTelemetry?.trafficMbps ?? seedMatch?.trafficMbps ?? 240,
+              availabilityPct: c.currentTelemetry?.availabilityPct ?? seedMatch?.availabilityPct ?? 99.4,
+              jitterMs: c.currentTelemetry?.jitterMs ?? seedMatch?.jitterMs ?? (isAnomaly ? 14.2 : 3.8),
+              activeAlarms: c.activeAlarms || (isAnomaly ? ['HIGH_LATENCY', 'PACKET_DISCARD'] : []),
+              anomalyScore: c.anomalyScore ?? (isAnomaly ? 84 : 12),
+              anomalyConfidence: c.anomalyConfidence ?? seedMatch?.anomalyConfidence ?? (isAnomaly ? 92 : isWarning ? 78 : 95),
+              possibleCauses: c.possibleCauses || seedMatch?.possibleCauses || (isAnomaly ? ['PRB congestion & buffer saturation', 'Elevated backhaul transport latency', 'Physical channel fading'] : ['Nominal operational profile', 'Optimal backhaul throughput']),
+              aiIncidentSummary: c.aiIncidentSummary || seedMatch?.aiIncidentSummary || (isAnomaly ? `Cell ${c.cellId} is exhibiting anomalous packet discard and high latency. Traffic offloading recommended.` : `Cell ${c.cellId} is operating normally within 3GPP SLA parameters.`),
+              lastAlarmTime: c.lastAlarmTime || seedMatch?.lastAlarmTime || (isAnomaly ? 'Active Alarm (Critical)' : 'None (Clear)'),
+              baselineLatency: c.nominalBaseline?.latencyMs ?? seedMatch?.baselineLatency ?? 30,
+              baselineTraffic: c.nominalBaseline?.trafficMbps ?? seedMatch?.baselineTraffic ?? 400
+            };
+          });
           setCells(mappedCells);
         }
       }
@@ -253,74 +266,79 @@ export default function App() {
           onOpenScenarioCenter={() => setIsScenarioCenterOpen(true)}
         />
 
-        {activePage === 'dashboard' && (
-          <DashboardPage
-            summary={summary}
-            championModel={championModel}
-            wilayas={SYNTHETIC_WILAYA_SIMULATION}
-            customers={customers}
-            cells={cells}
-            trafficForecast={HOURLY_TRAFFIC_FORECAST}
-            onNavigate={handleNavigate}
-            onSelectCustomer={(id) => {
-              setSelectedCustomerId(id);
-              handleNavigate('customers');
-            }}
-            onSelectCell={(id) => {
-              setSelectedCellId(id);
-              handleNavigate('network');
-            }}
-          />
-        )}
+        <ErrorBoundary
+          fallbackTitle="Module View Error"
+          onReset={() => setActivePage('dashboard')}
+        >
+          {activePage === 'dashboard' && (
+            <DashboardPage
+              summary={summary}
+              championModel={championModel}
+              wilayas={SYNTHETIC_WILAYA_SIMULATION}
+              customers={customers}
+              cells={cells}
+              trafficForecast={HOURLY_TRAFFIC_FORECAST}
+              onNavigate={handleNavigate}
+              onSelectCustomer={(id) => {
+                setSelectedCustomerId(id);
+                handleNavigate('customers');
+              }}
+              onSelectCell={(id) => {
+                setSelectedCellId(id);
+                handleNavigate('network');
+              }}
+            />
+          )}
 
-        {activePage === 'operations' && (
-          <OperationsPage
-            incidents={incidents}
-            impacts={impacts}
-            qosMetrics={qosMetrics}
-            customers={customers}
-            cells={cells}
-            onUpdateIncident={handleUpdateIncident}
-            onNavigate={handleNavigate}
-            onSelectCell={(id) => {
-              setSelectedCellId(id);
-              handleNavigate('network');
-            }}
-            onSelectCustomer={(id) => {
-              setSelectedCustomerId(id);
-              handleNavigate('customers');
-            }}
-            onInspectIncident={handleOpenIncidentDetail}
-          />
-        )}
+          {activePage === 'operations' && (
+            <OperationsPage
+              incidents={incidents}
+              impacts={impacts}
+              qosMetrics={qosMetrics}
+              customers={customers}
+              cells={cells}
+              onUpdateIncident={handleUpdateIncident}
+              onNavigate={handleNavigate}
+              onSelectCell={(id) => {
+                setSelectedCellId(id);
+                handleNavigate('network');
+              }}
+              onSelectCustomer={(id) => {
+                setSelectedCustomerId(id);
+                handleNavigate('customers');
+              }}
+              onInspectIncident={handleOpenIncidentDetail}
+            />
+          )}
 
-        {activePage === 'customers' && (
-          <CustomersPage
-            customers={customers}
-            summary={summary}
-            selectedCustomerId={selectedCustomerId}
-            onSelectCustomer={setSelectedCustomerId}
-            onUpdateCustomer={handleUpdateCustomer}
-            cells={cells}
-          />
-        )}
+          {activePage === 'customers' && (
+            <CustomersPage
+              customers={customers}
+              summary={summary}
+              selectedCustomerId={selectedCustomerId}
+              onSelectCustomer={setSelectedCustomerId}
+              onUpdateCustomer={handleUpdateCustomer}
+              cells={cells}
+            />
+          )}
 
-        {activePage === 'network' && (
-          <NetworkPage
-            cells={cells}
-            selectedCellId={selectedCellId}
-            onSelectCell={setSelectedCellId}
-            onUpdateCell={handleUpdateCell}
-          />
-        )}
+          {activePage === 'network' && (
+            <NetworkPage
+              cells={cells}
+              selectedCellId={selectedCellId}
+              onSelectCell={setSelectedCellId}
+              onUpdateCell={handleUpdateCell}
+            />
+          )}
 
-        {activePage === 'predictions' && (
-          <PredictionsPage />
-        )}
+          {activePage === 'predictions' && (
+            <PredictionsPage />
+          )}
 
-        {activePage === 'about' && (
-          <AboutPage />
-        )}
+          {activePage === 'about' && (
+            <AboutPage />
+          )}
+        </ErrorBoundary>
       </main>
 
       {/* Modals & Dialogs */}
