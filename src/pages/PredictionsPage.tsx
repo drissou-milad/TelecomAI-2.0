@@ -253,6 +253,45 @@ export const PredictionsPage: React.FC = () => {
 
       {activeTab === 'benchmarks' && churnModelBenchmarks.length > 0 && anomalyModelSpecs && (
         <div className="space-y-4">
+          {/* Prominent Synthetic Benchmark Notice (Requirement 11) */}
+          <div className="bg-amber-500/10 border-l-4 border-amber-500 p-4 rounded-r-xl flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <div className="text-xs text-amber-200 leading-relaxed">
+              <span className="font-bold text-amber-300 block text-sm mb-0.5">
+                Synthetic Benchmark Notice
+              </span>
+              Synthetic benchmark — results are not representative of performance on a commercial operator network. All metrics reflect validation against calibrated synthetic telemetry distributions.
+            </div>
+          </div>
+
+          {/* Architectural Separation: Deterministic vs ML Intelligence (Requirement 11 & 13) */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-sky-400" />
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-300">
+                System Boundary: Machine Learning vs. Deterministic Intelligence
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-1">
+                <span className="font-bold text-sky-400 flex items-center gap-1.5 text-[11px] uppercase tracking-wider">
+                  <Cpu className="w-3.5 h-3.5" /> Statistical Machine Learning Models
+                </span>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  <strong>Gradient Boosting</strong> computes non-linear subscriber churn probabilities with SHAP explainability. <strong>Isolation Forest</strong> detects multidimensional anomalies across cell radio vectors without labeled downtime history.
+                </p>
+              </div>
+              <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-1">
+                <span className="font-bold text-emerald-400 flex items-center gap-1.5 text-[11px] uppercase tracking-wider">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Deterministic Business Logic
+                </span>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  <strong>Priority calculation (P1–P4)</strong>, <strong>Customer Experience Index (CXS)</strong>, <strong>SLA countdowns</strong>, and <strong>Revenue at Risk (ARPU exposure)</strong> are computed using transparent, deterministic mathematical formulas — not opaque neural models.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Explanation Bento Banner */}
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-start gap-3">
             <div className="p-2 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 shrink-0">
@@ -260,11 +299,11 @@ export const PredictionsPage: React.FC = () => {
             </div>
             <div className="text-xs text-slate-300 leading-relaxed space-y-1">
               <span className="text-white font-bold block text-sm">
-                Why Precision, Recall & ROC-AUC Matter (Over Naive Accuracy)
+                Churn Model: Gradient Boosting Classifier Evaluation
               </span>
               <p>
                 Telecom churn datasets are heavily imbalanced: typically only 4–7% of subscribers churn in a given month. A naive model predicting everyone stays achieves 95% accuracy while identifying zero at-risk customers. 
-                Our benchmark trains <strong>Logistic Regression</strong>, <strong>Decision Tree</strong>, <strong>Random Forest</strong>, and <strong>Gradient Boosting</strong> under stratified validation. <strong>Gradient Boosting</strong> was dynamically selected as production champion with <strong>ROC-AUC: 0.961</strong>, <strong>Precision: 0.766</strong>, <strong>Recall: 0.718</strong>, and <strong>F1 Score: 0.741</strong>.
+                Our benchmark evaluates <strong>Logistic Regression</strong>, <strong>Decision Tree</strong>, <strong>Random Forest</strong>, and <strong>Gradient Boosting</strong> under 5-fold stratified cross-validation on a 10,000 synthetic subscriber cohort (80/20 train/test split). <strong>Gradient Boosting</strong> was dynamically selected as production champion with <strong>ROC-AUC: 0.961</strong>, <strong>Precision: 0.766</strong>, <strong>Recall: 0.718</strong>, and <strong>F1 Score: 0.741</strong>.
               </p>
             </div>
           </div>

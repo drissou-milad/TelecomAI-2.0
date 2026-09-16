@@ -143,15 +143,64 @@ async function runVerificationSuite() {
   // Restore active simulation for demo
   simulateDegradation('Saida');
 
-  // 7. Model Performance Documentation
-  console.log('\n--- Test 7: ML Model Performance Retention ---');
+  // 7. Full End-to-End Operational Intelligence Loop (Requirement 16)
+  console.log('\n--- Test 7: Complete End-to-End Intelligence Loop ---');
+  // Step 1: Simulate cell degradation
+  const sim = simulateDegradation('Saida');
+  assert(sim.simulation.isActive === true, 'Step 1: Cell degradation successfully induced on Saida footprint');
+
+  // Step 2: Verify anomaly detected
+  const postDegradeOverview = getNetworkOverview();
+  assert(postDegradeOverview.detected_anomalies > 0, `Step 2: Anomaly detected (${postDegradeOverview.detected_anomalies} degraded cells)`);
+
+  // Step 3: Verify incident created / correlated
+  const loopAnalysis = analyzeNetwork({ wilaya: 'Saida' });
+  assert(loopAnalysis.infrastructure.cells > 0, 'Step 3: Network correlation mapped cells to canonical incident');
+
+  // Step 4: Verify customer impact calculated
+  assert(loopAnalysis.customer_impact.affected_customers > 0, `Step 4: Customer blast radius computed (${loopAnalysis.customer_impact.affected_customers} users)`);
+  assert(loopAnalysis.business_impact.revenue_at_risk > 0, `Step 4b: Business revenue risk calculated (${loopAnalysis.business_impact.revenue_at_risk} DZD)`);
+
+  // Step 5: Verify priority assigned
+  assert(loopAnalysis.priority === 'P1' || loopAnalysis.priority === 'P2', `Step 5: Operational priority dynamically assigned (${loopAnalysis.priority})`);
+
+  // Step 6: Verify recommended action produced
+  assert(loopAnalysis.ai_analysis.recommended_action.length > 10, `Step 6: AI operational recommendation produced ("${loopAnalysis.ai_analysis.recommended_action.slice(0, 40)}...")`);
+
+  // Step 7: Verify ITSM ticket generated
+  const e2eTicket = await itsmConnector.createTicket({
+    incident_id: 'INC-E2E-LOOP',
+    title: 'Automated E2E Verification Incident',
+    priority: loopAnalysis.priority,
+    severity: loopAnalysis.severity,
+    affected_infrastructure: {
+      wilaya: loopAnalysis.infrastructure.wilaya,
+      sites: loopAnalysis.infrastructure.sites,
+      cells: loopAnalysis.infrastructure.cells,
+      cell_ids: ['CELL-SAI-001', 'CELL-SAI-002'],
+      site_ids: ['SITE-SAI-001'],
+    },
+    customer_impact: loopAnalysis.customer_impact,
+    business_impact: {
+      impact_score: loopAnalysis.business_impact.impact_score,
+      revenue_at_risk_dzd: loopAnalysis.business_impact.revenue_at_risk,
+    },
+    ai_assessment: loopAnalysis.ai_analysis.assessment,
+    recommended_action: loopAnalysis.ai_analysis.recommended_action,
+    confidence: loopAnalysis.ai_analysis.confidence,
+    system: 'ServiceNow',
+  });
+  assert(e2eTicket.ticket_id.startsWith('INC-SNOW-'), `Step 7: ITSM ticket dispatched to enterprise queue (${e2eTicket.ticket_id})`);
+
+  // 8. Model Performance Documentation
+  console.log('\n--- Test 8: ML Model Performance Retention ---');
   const modelSpecs = getModelPerformanceSpecs();
   assert(modelSpecs.models.length === 2, 'Retained both Churn Champion and RAN Anomaly models');
   const champion = modelSpecs.models.find(m => m.isChampion);
   assert(champion?.metrics.rocAuc === 0.961, 'Gradient Boosting retains documented 0.961 ROC-AUC');
 
   console.log('\n==================================================');
-  console.log('ALL 7 TELECOMAI 2.0 VERIFICATION SUITES PASSED! 🎉');
+  console.log('ALL TELECOMAI 2.0 VERIFICATION SUITES PASSED! 🎉');
   console.log('==================================================\n');
 }
 

@@ -57,13 +57,71 @@ export interface AnomalyPredictionResult {
   recommendedResolution: string;
 }
 
-async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(url, options);
-  if (!response.ok) {
-    const errData = await response.json().catch(() => ({ error: response.statusText }));
-    throw new Error(errData.error || errData.detail || `Inference error: HTTP ${response.status}`);
+export type ApiStatus = 'idle' | 'loading' | 'success' | 'empty' | 'error' | 'timeout' | 'invalid_response';
+
+export interface ApiState<T> {
+  status: ApiStatus;
+  data: T | null;
+  error: string | null;
+}
+
+export class ApiTimeoutError extends Error {
+  constructor(message = 'API request timed out after 8000ms') {
+    super(message);
+    this.name = 'ApiTimeoutError';
   }
-  return response.json();
+}
+
+export class ApiInvalidResponseError extends Error {
+  constructor(message = 'Invalid response received from server') {
+    super(message);
+    this.name = 'ApiInvalidResponseError';
+  }
+}
+
+async function fetchJson<T>(url: string, options?: RequestInit, timeoutMs = 8000): Promise<T> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (response.status === 204) {
+      return null as unknown as T;
+    }
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({ error: response.statusText }));
+      throw new Error(errData.error || errData.detail || `Server error: HTTP ${response.status}`);
+    }
+
+    const text = await response.text();
+    if (!text || text.trim().length === 0) {
+      return null as unknown as T;
+    }
+
+    try {
+      const data = JSON.parse(text);
+      if (data === null || data === undefined) {
+        throw new ApiInvalidResponseError('Empty response payload');
+      }
+      return data as T;
+    } catch (parseErr: any) {
+      if (parseErr instanceof ApiInvalidResponseError) throw parseErr;
+      throw new ApiInvalidResponseError(`Invalid JSON payload: ${parseErr.message}`);
+    }
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new ApiTimeoutError(`API request to ${url} timed out after ${timeoutMs}ms`);
+    }
+    throw err;
+  }
 }
 
 /**

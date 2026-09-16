@@ -1,6 +1,6 @@
 {
   "name": "TelecomAI",
-  "description": "AI-Powered Telecom Operations & Customer Impact Intelligence Platform with decision support and automated operational workflow",
+  "description": "TelecomAI 2.0 correlates network telemetry, customer experience, and business impact to detect operational incidents, prioritize their severity, explain their impact, and recommend actionable responses.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

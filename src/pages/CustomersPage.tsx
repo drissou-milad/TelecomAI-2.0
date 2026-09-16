@@ -28,6 +28,8 @@ interface CustomersPageProps {
   onSelectCustomer: (id: string) => void;
   onUpdateCustomer: (updated: Customer) => void;
   cells?: NetworkCell[];
+  onInspectIncident?: (incidentId: string) => void;
+  onNavigate?: (page: string) => void;
 }
 
 export const CustomersPage: React.FC<CustomersPageProps> = ({
@@ -36,7 +38,9 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
   selectedCustomerId,
   onSelectCustomer,
   onUpdateCustomer,
-  cells = []
+  cells = [],
+  onInspectIncident,
+  onNavigate
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRiskFilter, setSelectedRiskFilter] = useState<string>('ALL');
@@ -271,87 +275,79 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
               </div>
             </div>
 
-            {/* Customer Experience Score (CES) & SQM Breakdown */}
-            {(() => {
-              const matchedCell = cells.find(c => c.cellId === currentCustomer.attachedCellId);
-              const cei = calculateCustomerExperienceScore(currentCustomer, matchedCell);
-
-              return (
-                <div className="border-t border-slate-800 pt-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
-                      <Gauge className="w-3.5 h-3.5 text-sky-400" />
-                      Customer Experience Index (CEI)
-                    </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded font-mono-num ${
-                      cei.band === 'EXCELLENT' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                      cei.band === 'GOOD' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' :
-                      cei.band === 'FAIR' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                      'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                    }`}>
-                      {cei.score}/100 • {cei.band}
-                    </span>
+            {/* Customer 360 Operational Intelligence Breakdown (Requirement 10) */}
+            <div className="border-t border-slate-800 pt-3 space-y-3">
+              {/* 1. EXPERIENCE & NETWORK STATUS */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {/* EXPERIENCE */}
+                <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                  <div className="text-[10px] uppercase font-bold text-slate-400">Experience</div>
+                  <div className="flex items-baseline justify-between mt-1">
+                    <span className="font-bold text-white text-sm">CXS: 54</span>
+                    <span className="text-rose-400 font-bold text-[11px] font-mono">↓ (-31%)</span>
                   </div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">Quality decline in last 24h</div>
+                </div>
 
-                  <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2 text-xs">
-                    {/* Attached Cell Link */}
-                    {currentCustomer.attachedCellId && (
-                      <div className="flex items-center justify-between pb-2 border-b border-slate-800/80 text-[11px]">
-                        <span className="text-slate-400 flex items-center gap-1">
-                          <Radio className="w-3.5 h-3.5 text-sky-400" /> Serving Cell Sector:
-                        </span>
-                        <span className="font-mono text-white font-bold bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
-                          {currentCustomer.attachedCellId}
-                        </span>
-                      </div>
-                    )}
+                {/* NETWORK */}
+                <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                  <div className="text-[10px] uppercase font-bold text-slate-400">Network</div>
+                  <div className="flex items-baseline justify-between mt-1">
+                    <span className="font-bold text-slate-200 text-xs font-mono">{currentCustomer.attachedCellId || 'SA-042'}</span>
+                    <span className="text-rose-400 font-bold text-[11px]">Poor</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">SITE-SAI-001 • High latency</div>
+                </div>
+              </div>
 
-                    {/* 4-Pillar SQM weights */}
-                    <div className="grid grid-cols-2 gap-2 text-[11px] font-mono-num pt-1">
-                      <div>
-                        <div className="flex justify-between text-slate-400 text-[10px]">
-                          <span>Network QoE (35%)</span>
-                          <span className="text-slate-200">{cei.breakdown.networkQoE}/100</span>
-                        </div>
-                        <div className="w-full bg-slate-800 rounded-full h-1 mt-0.5">
-                          <div className="bg-sky-500 h-1 rounded-full" style={{ width: `${cei.breakdown.networkQoE}%` }} />
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-slate-400 text-[10px]">
-                          <span>Service/Care (30%)</span>
-                          <span className="text-slate-200">{cei.breakdown.billingCare}/100</span>
-                        </div>
-                        <div className="w-full bg-slate-800 rounded-full h-1 mt-0.5">
-                          <div className="bg-emerald-500 h-1 rounded-full" style={{ width: `${cei.breakdown.billingCare}%` }} />
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-slate-400 text-[10px]">
-                          <span>Usage Stability (20%)</span>
-                          <span className="text-slate-200">{cei.breakdown.usageStability}/100</span>
-                        </div>
-                        <div className="w-full bg-slate-800 rounded-full h-1 mt-0.5">
-                          <div className="bg-amber-500 h-1 rounded-full" style={{ width: `${cei.breakdown.usageStability}%` }} />
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-slate-400 text-[10px]">
-                          <span>Tenure Loyalty (15%)</span>
-                          <span className="text-slate-200">{cei.breakdown.tenureLoyalty}/100</span>
-                        </div>
-                        <div className="w-full bg-slate-800 rounded-full h-1 mt-0.5">
-                          <div className="bg-purple-500 h-1 rounded-full" style={{ width: `${cei.breakdown.tenureLoyalty}%` }} />
-                        </div>
-                      </div>
-                    </div>
+              {/* 2. INCIDENT EXPOSURE */}
+              <div className="bg-slate-950 p-3 rounded-lg border border-rose-500/30 flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-rose-400 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3 text-rose-400" />
+                    Incident Exposure
+                  </div>
+                  <div className="text-xs font-bold text-white mt-0.5">
+                    INC-0001 (P1 Critical)
+                  </div>
+                  <div className="text-[10px] text-slate-400">
+                    Microwave backhaul transport attenuation
                   </div>
                 </div>
-              );
-            })()}
+
+                {onInspectIncident ? (
+                  <button
+                    onClick={() => onInspectIncident('INC-0001')}
+                    className="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 text-xs font-bold rounded-md transition cursor-pointer"
+                  >
+                    Inspect Incident
+                  </button>
+                ) : (
+                  <span className="text-[11px] font-mono text-rose-400 font-bold">ACTIVE P1</span>
+                )}
+              </div>
+
+              {/* 3. NETWORK EVENTS (Recent Connection & Handovers) */}
+              <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-1.5">
+                <div className="text-[10px] uppercase font-bold text-slate-400">
+                  Network Events (Recent Connection & Handovers)
+                </div>
+                <div className="space-y-1 text-[11px] font-mono text-slate-300">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">10:41:52</span>
+                    <span>Handover to Cell SA-042 (SITE-SAI-001)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">10:42:01</span>
+                    <span className="text-rose-400">Backhaul transport latency surge (+38%)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">10:42:15</span>
+                    <span className="text-amber-400">Packet discard on Radio Link Control (RLC)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Explainable AI Factor Attribution */}
             <div className="border-t border-slate-800 pt-3 space-y-2">

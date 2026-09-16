@@ -1158,109 +1158,111 @@ export const OperationsPage: React.FC<OperationsPageProps> = ({
               <span className="text-xs font-mono text-slate-400">Aggregated: 24h intervals</span>
             </div>
 
-            {/* Core KPI metrics grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 font-mono">
+            {/* Core KPI metrics grid & Severity Breakdown (Requirement 9) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
               <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800">
-                <span className="text-[11px] text-slate-400 block font-sans">Incidents this week</span>
-                <span className="text-2xl font-bold text-white block mt-1">27</span>
-                <span className="text-[10px] text-sky-400 block mt-0.5">100% deduplicated</span>
+                <span className="text-[11px] text-slate-400 block font-sans">Incidents by Severity (P1–P4)</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-rose-400 font-bold text-lg">4 P1</span>
+                  <span className="text-slate-600">•</span>
+                  <span className="text-amber-400 font-bold text-lg">9 P2</span>
+                  <span className="text-slate-600">•</span>
+                  <span className="text-sky-400 font-bold text-base">11 P3</span>
+                  <span className="text-slate-600">•</span>
+                  <span className="text-slate-400 font-bold text-base">3 P4</span>
+                </div>
+                <span className="text-[10px] text-sky-400 block mt-0.5">27 total deduplicated incidents</span>
               </div>
 
               <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800">
-                <span className="text-[11px] text-slate-400 block font-sans">P1 incidents</span>
-                <span className="text-2xl font-bold text-rose-400 block mt-1">4</span>
-                <span className="text-[10px] text-rose-400/80 block mt-0.5">Critical SLA active</span>
+                <span className="text-[11px] text-slate-400 block font-sans">Revenue Risk by Severity</span>
+                <span className="text-xl font-bold text-emerald-400 block mt-1">142,000 DZD</span>
+                <span className="text-[10px] text-slate-400 block mt-0.5">P1: 84.2k • P2: 38.5k • P3: 15.3k • P4: 4k</span>
               </div>
 
               <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800">
-                <span className="text-[11px] text-slate-400 block font-sans">P2 incidents</span>
-                <span className="text-2xl font-bold text-amber-400 block mt-1">9</span>
-                <span className="text-[10px] text-amber-400/80 block mt-0.5">Priority queue</span>
+                <span className="text-[11px] text-slate-400 block font-sans">Average Resolution Time</span>
+                <span className="text-xl font-bold text-sky-400 block mt-1">58 mins MTTR</span>
+                <span className="text-[10px] text-slate-400 block mt-0.5">P1 SLA: 42m (Target: &lt;60m)</span>
               </div>
 
               <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800">
-                <span className="text-[11px] text-slate-400 block font-sans">Customers affected</span>
-                <span className="text-2xl font-bold text-sky-400 block mt-1">8,421</span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Attached subscribers</span>
-              </div>
-
-              <div className="p-3.5 bg-slate-950 rounded-lg border border-slate-800 col-span-2 sm:col-span-1">
-                <span className="text-[11px] text-slate-400 block font-sans">Revenue risk</span>
-                <span className="text-2xl font-bold text-emerald-400 block mt-1">142k DZD</span>
-                <span className="text-[10px] text-emerald-400/80 block mt-0.5">Monthly ARPU impact</span>
+                <span className="text-[11px] text-slate-400 block font-sans">Subscribers Affected</span>
+                <span className="text-xl font-bold text-white block mt-1">8,421 Total</span>
+                <span className="text-[10px] text-rose-400 block mt-0.5">244 high churn risk</span>
               </div>
             </div>
           </div>
 
-          {/* Top Affected Sites & Top Incident Types */}
+          {/* Regional Distribution & Most Common Root Causes */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* TOP AFFECTED SITES */}
+            {/* INCIDENTS BY WILAYA / REGION */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                   <Server className="w-4 h-4 text-rose-400" />
-                  <span>TOP AFFECTED SITES</span>
+                  <span>INCIDENTS BY WILAYA / REGION</span>
                 </h4>
-                <span className="text-[10px] font-mono text-slate-500">Incident Frequency</span>
+                <span className="text-[10px] font-mono text-slate-500">Regional Cluster Distribution</span>
               </div>
 
               <div className="space-y-2.5 text-xs font-mono">
                 {[
-                  { siteId: 'SA-042', siteName: 'Saïda Central Hub', wilaya: 'Saïda', count: 7, health: 54 },
-                  { siteId: 'OR-017', siteName: 'Oran Marina Port', wilaya: 'Oran', count: 5, health: 68 },
-                  { siteId: 'ALG-103', siteName: 'Algiers Didouche', wilaya: 'Algiers', count: 4, health: 72 },
-                  { siteId: 'TLM-034', siteName: 'Tlemcen Mansourah', wilaya: 'Tlemcen', count: 4, health: 62 },
-                  { siteId: 'CST-088', siteName: 'Constantine Cirta', wilaya: 'Constantine', count: 3, health: 79 }
+                  { wilaya: 'Algiers', count: 8, pct: 30, sites: '12 Degraded', color: 'bg-rose-500' },
+                  { wilaya: 'Oran', count: 6, pct: 22, sites: '7 Degraded', color: 'bg-amber-500' },
+                  { wilaya: 'Saïda', count: 5, pct: 19, sites: '4 Degraded', color: 'bg-sky-500' },
+                  { wilaya: 'Constantine', count: 4, pct: 15, sites: '3 Degraded', color: 'bg-indigo-500' },
+                  { wilaya: 'Tlemcen', count: 4, pct: 15, sites: '3 Degraded', color: 'bg-purple-500' },
                 ].map((s) => (
-                  <div key={s.siteId} className="p-3 bg-slate-950 rounded-lg border border-slate-800 flex items-center justify-between">
-                    <div>
+                  <div key={s.wilaya} className="p-3 bg-slate-950 rounded-lg border border-slate-800 space-y-1.5">
+                    <div className="flex items-center justify-between">
                       <div className="font-bold text-white flex items-center gap-2">
-                        <span className="text-sky-400 font-mono">{s.siteId}</span>
-                        <span className="font-sans font-semibold text-slate-200">• {s.siteName}</span>
+                        <span className="text-sky-400 font-mono">{s.wilaya}</span>
+                        <span className="text-[11px] text-slate-400 font-sans">• {s.sites}</span>
                       </div>
-                      <span className="text-[10px] text-slate-400 font-sans">{s.wilaya} Region</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xs font-bold text-rose-400 font-mono block">
-                        {s.count} incidents
+                      <span className="text-xs font-bold text-white font-mono">
+                        {s.count} incidents ({s.pct}%)
                       </span>
-                      <span className="text-[10px] text-slate-400 font-sans">Health: {s.health}%</span>
+                    </div>
+                    <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                      <div className={`h-full ${s.color} rounded-full`} style={{ width: `${s.pct}%` }} />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* TOP INCIDENT TYPES */}
+            {/* MOST COMMON ROOT CAUSES */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber-400" />
-                  <span>TOP INCIDENT TYPES</span>
+                  <span>MOST COMMON ROOT CAUSES</span>
                 </h4>
                 <span className="text-[10px] font-mono text-slate-500">Root Cause Categorization</span>
               </div>
 
               <div className="space-y-3 text-xs">
                 {[
-                  { type: 'Congestion', count: 11, pct: 41, color: 'bg-rose-500' },
-                  { type: 'Packet loss', count: 7, pct: 26, color: 'bg-amber-500' },
-                  { type: 'Latency', count: 5, pct: 19, color: 'bg-sky-500' },
-                  { type: 'Availability', count: 4, pct: 14, color: 'bg-indigo-500' },
+                  { type: 'Backhaul / Microwave Transport Congestion', count: 11, pct: 41, color: 'bg-rose-500', resolution: 'Bandwidth reprovisioning & failover' },
+                  { type: 'RF Packet Loss & Rain Fade', count: 7, pct: 26, color: 'bg-amber-500', resolution: 'Antenna tilt optimization' },
+                  { type: 'High Latency & Buffer Queueing', count: 5, pct: 19, color: 'bg-sky-500', resolution: 'QoS traffic shaping reweight' },
+                  { type: 'Cell Availability & Power Rectifier Outage', count: 4, pct: 14, color: 'bg-indigo-500', resolution: 'Generator dispatch & battery replacement' },
                 ].map((item) => (
-                  <div key={item.type} className="p-2.5 bg-slate-950 rounded-lg border border-slate-800">
-                    <div className="flex justify-between items-center mb-1.5 font-sans">
+                  <div key={item.type} className="p-2.5 bg-slate-950 rounded-lg border border-slate-800 space-y-1">
+                    <div className="flex justify-between items-center font-sans">
                       <span className="font-semibold text-slate-200">{item.type}</span>
                       <span className="text-sky-400 font-bold font-mono text-xs">
-                        {item.count} incidents ({item.pct}%)
+                        {item.count} ({item.pct}%)
                       </span>
                     </div>
-                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
                       <div 
                         className={`h-full ${item.color} rounded-full transition-all duration-500`} 
                         style={{ width: `${item.pct}%` }} 
                       />
                     </div>
+                    <div className="text-[10px] text-slate-500 font-sans">Playbook: {item.resolution}</div>
                   </div>
                 ))}
               </div>

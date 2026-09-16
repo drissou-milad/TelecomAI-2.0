@@ -30,6 +30,7 @@ export type ScenarioType =
   | 'cell_congestion'
   | 'high_latency'
   | 'packet_loss'
+  | 'cell_availability'
   | 'site_outage'
   | 'regional_degradation'
   | 'nominal';
@@ -76,12 +77,13 @@ export const ScenarioCenter: React.FC<ScenarioCenterProps> = ({
   const currentSeverity = severityLevels[severityIndex];
 
   const scenarios = [
-    { id: 'backhaul_degradation' as ScenarioType, name: 'Cell / Site Degradation (Backhaul Attenuation)' },
-    { id: 'cell_congestion' as ScenarioType, name: 'Cell Capacity Congestion (PRB Saturation >94%)' },
-    { id: 'high_latency' as ScenarioType, name: 'High Latency / Jitter Surge (Fiber Buffer Queueing)' },
-    { id: 'packet_loss' as ScenarioType, name: 'RF Packet Loss & Rain Fade (+16% Delta)' },
-    { id: 'site_outage' as ScenarioType, name: 'Base Station Power Rectifier Outage (Zero Availability)' },
-    { id: 'regional_degradation' as ScenarioType, name: 'Regional Metropolitan Cluster Degradation' },
+    { id: 'cell_congestion' as ScenarioType, name: 'Network Congestion (PRB Saturation >94%)' },
+    { id: 'backhaul_degradation' as ScenarioType, name: 'Backhaul Degradation (Microwave Attenuation +38%)' },
+    { id: 'high_latency' as ScenarioType, name: 'High Latency (Buffer Queueing & Jitter Surge)' },
+    { id: 'packet_loss' as ScenarioType, name: 'Packet Loss (RF Rain Fade & Retransmission Drop)' },
+    { id: 'cell_availability' as ScenarioType, name: 'Cell Availability Degradation (PA Hardware Fault)' },
+    { id: 'site_outage' as ScenarioType, name: 'Site Outage (Total Power / Rectifier Failure)' },
+    { id: 'regional_degradation' as ScenarioType, name: 'Regional Degradation (Cluster Weather Attenuation)' },
     { id: 'nominal' as ScenarioType, name: 'Nominal Baseline (Restore All 38 Sectors)' },
   ];
 
