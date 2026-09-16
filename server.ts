@@ -424,8 +424,18 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Telecom AI Platform server running on http://0.0.0.0:${PORT}`);
+  });
+
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`\n❌ [PORT IN USE] Port ${PORT} is already in use by another running process.`);
+      console.error(`Please close any existing terminal running TelecomAI or run:\n  netstat -ano | findstr :${PORT}\n  taskkill /PID <PID> /F\n`);
+      process.exit(1);
+    } else {
+      console.error('Server error:', err);
+    }
   });
 }
 

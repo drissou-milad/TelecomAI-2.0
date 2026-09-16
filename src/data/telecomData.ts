@@ -309,6 +309,8 @@ export const INITIAL_CUSTOMERS: Customer[] = [
   }
 ];
 
+export const SEED_CUSTOMERS = INITIAL_CUSTOMERS;
+
 export const INITIAL_CELLS: NetworkCell[] = [
   // Cells explicitly highlighted in prompt section 4 & 8 & 18:
   {
@@ -530,6 +532,8 @@ export const INITIAL_CELLS: NetworkCell[] = [
   }
 ];
 
+export const SEED_NETWORK_CELLS = INITIAL_CELLS;
+
 // 24-Hour Traffic Forecasting curve (Today Actual vs Tomorrow Predicted)
 // Highlighted in prompt section 16
 export const TRAFFIC_FORECAST_DATA: TrafficForecastPoint[] = [
@@ -561,8 +565,6 @@ export const NOC_TELEMETRY_SERIES: TelemetryTrendPoint[] = [
   { time: '17:00', latency: 49.0, packetLoss: 1.95, jitter: 7.2, throughput: 18.7 }
 ];
 
-export const SEED_CUSTOMERS = INITIAL_CUSTOMERS;
-export const SEED_NETWORK_CELLS = INITIAL_CELLS;
 export const HOURLY_TRAFFIC_FORECAST = TRAFFIC_FORECAST_DATA;
 
 /**

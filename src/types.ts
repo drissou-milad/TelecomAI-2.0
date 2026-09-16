@@ -59,6 +59,9 @@ export interface NetworkCell {
   lastAlarmTime: string;
   baselineLatency: number;
   baselineTraffic: number;
+  frequencyBand?: string;
+  azimuthDeg?: number;
+  activeAlarms?: string[];
   prbUtilizationPct?: number;
   volteMos?: number; // Voice MOS (1.0 - 5.0)
   connectedVipCount?: number;

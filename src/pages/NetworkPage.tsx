@@ -31,7 +31,7 @@ import {
   Legend 
 } from 'recharts';
 import { NetworkCell, CellStatus } from '../types';
-import { NOC_TELEMETRY_SERIES } from '../data/telecomData';
+import { NOC_TELEMETRY_SERIES, SEED_NETWORK_CELLS } from '../data/telecomData';
 import { INITIAL_SITES } from '../data/operationsData';
 import { predictNetworkAnomalyApi } from '../ml/mlEngine';
 
@@ -55,16 +55,35 @@ export const NetworkPage: React.FC<NetworkPageProps> = ({
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  // Active selected cell with robust fallback to SEED_NETWORK_CELLS
-  const fallbackCell = SEED_NETWORK_CELLS[0];
+  // Active selected cell with robust fallback
+  const fallbackCell: NetworkCell = (Array.isArray(SEED_NETWORK_CELLS) && SEED_NETWORK_CELLS[0]) ? SEED_NETWORK_CELLS[0] : {
+    cellId: 'CELL-001',
+    siteName: 'Algiers Port Maritime',
+    wilaya: 'Algiers',
+    technology: '5G NR',
+    users: 842,
+    latencyMs: 31,
+    packetLossPct: 0.4,
+    trafficMbps: 421,
+    availabilityPct: 99.8,
+    jitterMs: 3.2,
+    status: 'normal',
+    anomalyScore: 0.48,
+    anomalyConfidence: 94,
+    possibleCauses: ['Nominal 5G beamforming operation'],
+    aiIncidentSummary: 'Cell is operating within SLA bounds.',
+    lastAlarmTime: 'None (Clear)',
+    baselineLatency: 30,
+    baselineTraffic: 400
+  };
   const currentCell: NetworkCell = 
-    cells.find(c => c.cellId === selectedCellId) || 
-    cells.find(c => c.cellId === 'CELL-TLM-034') || 
-    cells[0] ||
+    (cells || []).find(c => c.cellId === selectedCellId) || 
+    (cells || []).find(c => c.cellId === 'CELL-TLM-034') || 
+    (cells || [])[0] ||
     fallbackCell;
 
   // Filtered cells list (fallback to seed cells if cells array is empty)
-  const displayCells = cells.length > 0 ? cells : SEED_NETWORK_CELLS;
+  const displayCells = (cells && cells.length > 0) ? cells : (Array.isArray(SEED_NETWORK_CELLS) ? SEED_NETWORK_CELLS : [fallbackCell]);
   const filteredCells = displayCells.filter(cell => {
     const matchesSearch = 
       (cell.cellId || '').toLowerCase().includes(searchCell.toLowerCase()) ||
