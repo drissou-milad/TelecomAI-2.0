@@ -15,7 +15,8 @@ import {
   RefreshCw,
   Zap,
   Gauge,
-  Radio
+  Radio,
+  Activity
 } from 'lucide-react';
 import { Customer, RiskLevel, DashboardSummary, NetworkCell } from '../types';
 import { predictCustomerChurnApi } from '../ml/mlEngine';
@@ -242,6 +243,61 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
               <div className="text-right text-xs font-mono-num">
                 <div className="text-slate-500 text-[10px] uppercase font-semibold">Usage Trend</div>
                 <div className="text-rose-400 font-bold text-sm">-{currentCustomer.usageDeclinePct}% (30d)</div>
+              </div>
+            </div>
+
+            {/* Customer 360 Operational Chain (Requirement 10) */}
+            <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2 my-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold text-sky-400 flex items-center gap-1.5 tracking-wider">
+                  <Activity className="w-3.5 h-3.5 text-sky-400" />
+                  Customer 360 Operational Chain
+                </span>
+                <span className="text-[10px] font-mono text-slate-500">Cross-Domain Telemetry Trace</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 text-center text-[10px] font-mono">
+                {/* 1. Customer */}
+                <div className="bg-slate-900 p-2 rounded border border-slate-800 flex flex-col justify-between">
+                  <span className="text-slate-400 text-[9px] uppercase font-bold">1. Customer</span>
+                  <span className="text-white font-bold text-[11px] truncate mt-0.5">{currentCustomer.name.split(' ')[0]}</span>
+                  <span className="text-slate-500 text-[9px]">{currentCustomer.isVip ? 'VIP Tier' : `${currentCustomer.subscription} Tier`}</span>
+                </div>
+
+                {/* 2. Serving Cell */}
+                <div className="bg-slate-900 p-2 rounded border border-slate-800 flex flex-col justify-between">
+                  <span className="text-slate-400 text-[9px] uppercase font-bold">2. Serving Cell</span>
+                  <span className="text-sky-300 font-bold text-[11px] mt-0.5">{currentCustomer.attachedCellId || 'SA-042'}</span>
+                  <span className="text-slate-500 text-[9px]">SITE-SAI-001</span>
+                </div>
+
+                {/* 3. Network Condition */}
+                <div className="bg-slate-900 p-2 rounded border border-rose-500/30 flex flex-col justify-between">
+                  <span className="text-slate-400 text-[9px] uppercase font-bold">3. Network Status</span>
+                  <span className="text-rose-400 font-bold text-[11px] mt-0.5">Degraded</span>
+                  <span className="text-rose-400/80 text-[9px]">Lat +38%</span>
+                </div>
+
+                {/* 4. Experience Score */}
+                <div className="bg-slate-900 p-2 rounded border border-slate-800 flex flex-col justify-between">
+                  <span className="text-slate-400 text-[9px] uppercase font-bold">4. CXS Score</span>
+                  <span className="text-amber-400 font-bold text-[11px] mt-0.5">54 / 100</span>
+                  <span className="text-rose-400 text-[9px]">↓ -31% (24h)</span>
+                </div>
+
+                {/* 5. Churn Risk */}
+                <div className="bg-slate-900 p-2 rounded border border-slate-800 flex flex-col justify-between">
+                  <span className="text-slate-400 text-[9px] uppercase font-bold">5. Churn Risk</span>
+                  <span className="text-rose-400 font-bold text-[11px] mt-0.5">{currentCustomer.churnProbability}%</span>
+                  <span className="text-slate-500 text-[9px]">Gradient Boost</span>
+                </div>
+
+                {/* 6. Active Incident */}
+                <div className="bg-slate-900 p-2 rounded border border-rose-500/40 flex flex-col justify-between">
+                  <span className="text-rose-400 text-[9px] uppercase font-bold">6. Incident</span>
+                  <span className="text-white font-bold text-[11px] mt-0.5">INC-0001</span>
+                  <span className="text-rose-400 font-bold text-[9px]">P1 Critical</span>
+                </div>
               </div>
             </div>
 

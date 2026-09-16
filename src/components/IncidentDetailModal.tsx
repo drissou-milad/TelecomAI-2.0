@@ -182,6 +182,63 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
             </div>
           )}
 
+          {/* 1. CENTRAL IMPACT CHAIN BANNER (Requirement 5) */}
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-sm">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800 mb-3">
+              <span className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-sky-400" />
+                End-to-End Operational Impact Chain
+              </span>
+              <span className="text-[10px] font-mono text-slate-500">
+                Network ➔ Customer ➔ Business ➔ Incident ➔ Action
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center text-xs">
+              <div className="bg-slate-900/80 p-2.5 rounded-lg border border-rose-500/30 flex flex-col justify-between">
+                <div className="text-[10px] font-mono font-bold text-rose-400 uppercase">1. Network Event</div>
+                <div className="text-white font-bold text-xs mt-1">{incident.cellId || 'Cell SA-042'}</div>
+                <div className="text-[10px] text-rose-400 font-mono mt-0.5">Latency +38% • Loss +12%</div>
+              </div>
+
+              <div className="bg-slate-900/80 p-2.5 rounded-lg border border-amber-500/30 flex flex-col justify-between">
+                <div className="text-[10px] font-mono font-bold text-amber-400 uppercase">2. Network Impact</div>
+                <div className="text-white font-bold text-xs mt-1">4 Cells / 2 Sites</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Saïda Central Hub</div>
+              </div>
+
+              <div className="bg-slate-900/80 p-2.5 rounded-lg border border-indigo-500/30 flex flex-col justify-between">
+                <div className="text-[10px] font-mono font-bold text-indigo-400 uppercase">3. Customer Impact</div>
+                <div className="text-white font-bold text-xs mt-1">{incident.impactedSubscribers || 1284} Users</div>
+                <div className="text-[10px] text-rose-400 mt-0.5">187 High-Risk Churn</div>
+              </div>
+
+              <div className="bg-slate-900/80 p-2.5 rounded-lg border border-emerald-500/30 flex flex-col justify-between">
+                <div className="text-[10px] font-mono font-bold text-emerald-400 uppercase">4. Business Impact</div>
+                <div className="text-white font-bold text-xs mt-1">12,500 DZD</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Estimated Revenue at Risk</div>
+              </div>
+
+              <div className="bg-slate-900/80 p-2.5 rounded-lg border border-purple-500/30 flex flex-col justify-between">
+                <div className="text-[10px] font-mono font-bold text-purple-400 uppercase">5. Incident</div>
+                <div className="text-white font-bold text-xs mt-1">{incident.priority || 'P1 — CRITICAL'}</div>
+                <div className="text-[10px] text-purple-300 font-mono mt-0.5">60m Dynamic SLA</div>
+              </div>
+
+              <div className="bg-slate-900/80 p-2.5 rounded-lg border border-cyan-500/30 flex flex-col justify-between">
+                <div className="text-[10px] font-mono font-bold text-cyan-400 uppercase">6. Recommendations</div>
+                <div className="text-white font-bold text-xs mt-1">Dual Playbook</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Carrier Failover + SMS</div>
+              </div>
+
+              <div className="bg-slate-900/80 p-2.5 rounded-lg border border-emerald-500/30 flex flex-col justify-between">
+                <div className="text-[10px] font-mono font-bold text-emerald-400 uppercase">7. ITSM Prototype</div>
+                <div className="text-white font-bold text-xs mt-1">ServiceNow Ready</div>
+                <div className="text-[10px] text-emerald-400 font-mono mt-0.5">Compatible Payload</div>
+              </div>
+            </div>
+          </div>
+
           {/* 2. THREE IMPACT BLOCKS (Requirement 5) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
             {/* NETWORK IMPACT */}
@@ -254,17 +311,17 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                   Business Impact
                 </span>
                 <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
-                  Financial Risk
+                  Financial Exposure
                 </span>
               </div>
               <div className="space-y-1.5 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Revenue at Risk:</span>
+                  <span className="text-slate-400">Estimated Revenue at Risk:</span>
                   <span className="font-mono font-bold text-rose-400">12,500 DZD</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Exposure Period:</span>
-                  <span className="font-mono text-slate-300">Monthly recurring</span>
+                  <span className="font-mono text-slate-300">Synthetic monthly</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">SLA Breach Penalty:</span>
@@ -272,7 +329,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Calculation Method:</span>
-                  <span className="font-mono text-slate-400">Deterministic ARPU</span>
+                  <span className="font-mono text-slate-400">Deterministic ARPU Math</span>
                 </div>
               </div>
             </div>
@@ -342,13 +399,21 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
             {/* AI OPERATIONAL ASSESSMENT (Span 7) */}
             <div className="lg:col-span-7 bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-sm flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between pb-2 border-b border-slate-800 mb-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-800 mb-2.5">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
                     AI Operational Assessment (Structured Inference)
                   </h3>
                   <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 font-mono font-bold">
                     Confidence: 84%
+                  </span>
+                </div>
+
+                {/* Explicit Pipeline Breakdown */}
+                <div className="mb-3 px-2.5 py-1.5 bg-slate-900/90 rounded-lg border border-slate-800 flex items-center justify-between text-[11px]">
+                  <span className="text-slate-400 font-mono text-[10px]">Reasoning Chain:</span>
+                  <span className="text-sky-300 font-mono text-[11px] font-medium">
+                    Evidence ➔ Deterministic Analysis ➔ Operational Reasoning ➔ Recommendation
                   </span>
                 </div>
 
@@ -391,8 +456,8 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
               </div>
 
               <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-                <span>Model: Multi-Layer Spatial Correlation Engine</span>
-                <span className="text-purple-400 font-mono font-semibold">High Certainty Validation</span>
+                <span>Model: Deterministic Operational Correlation Engine</span>
+                <span className="text-purple-400 font-mono font-semibold">Human-in-the-loop Advisory</span>
               </div>
             </div>
           </div>
@@ -425,50 +490,52 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
               </div>
 
               <div className="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
-                <div className="text-slate-400 text-[11px]">Customer Blast Radius</div>
+                <div className="text-slate-400 text-[11px]">Customer Exposure</div>
                 <div className="font-mono font-bold text-rose-400 text-sm mt-0.5">High</div>
-                <div className="text-[10px] text-slate-500 mt-0.5">1,284 users {'>'} 1,000</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">1,284 users {'>'} 1,000 threshold</div>
               </div>
 
               <div className="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
-                <div className="text-slate-400 text-[11px]">High-Risk Exposure</div>
+                <div className="text-slate-400 text-[11px]">Revenue Exposure</div>
                 <div className="font-mono font-bold text-rose-400 text-sm mt-0.5">High</div>
-                <div className="text-[10px] text-slate-500 mt-0.5">187 users {'>'} 100</div>
-              </div>
-
-              <div className="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
-                <div className="text-slate-400 text-[11px]">Business Impact</div>
-                <div className="font-mono font-bold text-amber-400 text-sm mt-0.5">Medium</div>
-                <div className="text-[10px] text-slate-500 mt-0.5">12,500 DZD MRR</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">12,500 DZD {'>'} 10k threshold</div>
               </div>
 
               <div className="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
                 <div className="text-slate-400 text-[11px]">Infrastructure Scope</div>
+                <div className="font-mono font-bold text-amber-400 text-sm mt-0.5">Medium</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">4 cells / 2 sites</div>
+              </div>
+
+              <div className="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
+                <div className="text-slate-400 text-[11px]">VIP Exposure</div>
                 <div className="font-mono font-bold text-rose-400 text-sm mt-0.5">High</div>
-                <div className="text-[10px] text-slate-500 mt-0.5">Multiple sites (2)</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">12 corporate VIP lines</div>
               </div>
             </div>
 
             {/* Primary Factors List */}
             <div className="p-3 bg-slate-900/60 rounded-lg border border-slate-800 text-xs">
-              <span className="font-bold text-slate-300 block mb-1.5">Primary Prioritization Factors:</span>
+              <span className="font-bold text-slate-300 block mb-1.5">Implementation Priority Criteria:</span>
               <ul className="space-y-1 text-slate-300 list-disc list-inside">
-                <li><strong className="text-white">Critical cell degradation:</strong> Primary sector SA-042 operating at 25% health capability.</li>
-                <li><strong className="text-white">1,284 affected subscribers:</strong> Exceeds Tier-1 operational threshold of 1,000 users.</li>
-                <li><strong className="text-white">187 high-risk subscribers:</strong> Exceeds high-risk churn threshold of 100 subscribers.</li>
-                <li><strong className="text-white">Multiple sites affected:</strong> Impairs 2 base stations simultaneously, indicating backhaul failure.</li>
+                <li><strong className="text-white">Network severity: HIGH</strong> (primary radio sector SA-042 degraded to 25% health capability).</li>
+                <li><strong className="text-white">Customer exposure: HIGH</strong> (1,284 affected subscribers exceeds 1,000 threshold).</li>
+                <li><strong className="text-white">Revenue exposure: HIGH</strong> (12,500 DZD estimated risk exceeds 10,000 DZD threshold).</li>
+                <li><strong className="text-white">Infrastructure scope: MEDIUM</strong> (multi-sector failure across 4 cells and 2 physical sites).</li>
+                <li><strong className="text-white">VIP exposure: HIGH</strong> (12 corporate accounts triggering priority SLA escalation).</li>
+                <li><strong className="text-emerald-400">Result: P1-CRITICAL</strong> (assigned 60-minute resolution SLA).</li>
               </ul>
             </div>
 
             {/* Exact Formula Accordion */}
             {showFormulaModal && (
               <div className="mt-3 p-3 bg-slate-900 rounded-lg border border-sky-500/30 text-xs font-mono space-y-2 text-slate-300">
-                <div className="text-sky-400 font-bold">Standard Telecom Operational Scoring Formula:</div>
+                <div className="text-sky-400 font-bold">Mathematical Formulation:</div>
                 <div className="p-2 bg-slate-950 rounded border border-slate-800 text-slate-200">
-                  Priority Score = 0.35 × (Affected_Users / 2000) + 0.30 × (Revenue_Risk / 20000) + 0.20 × Network_Severity + 0.15 × VIP_Factor
+                  Priority = P1 if (Severity ∈ [HIGH, CRITICAL] ∧ (Customers ≥ 1,000 ∨ RevenueExposure ≥ 10,000 DZD ∨ VIPCount ≥ 10))
                 </div>
                 <div className="text-slate-400 text-[11px]">
-                  Calculation: 0.35 × (1284 / 2000 = 0.642) + 0.30 × (12500 / 20000 = 0.625) + 0.20 × 1.0 + 0.15 × 1.0 = <span className="text-emerald-400 font-bold">88.5 / 100</span> (Threshold &gt; 80.0 ➔ <strong>P1-CRITICAL</strong>)
+                  Weighted Score: 0.35 × (1284 / 2000) + 0.30 × (12500 / 20000) + 0.20 × 1.0 + 0.15 × 1.0 = <span className="text-emerald-400 font-bold">88.5 / 100</span> (Threshold &gt; 80.0 ➔ <strong>P1-CRITICAL</strong>)
                 </div>
               </div>
             )}
@@ -542,9 +609,14 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-slate-800 mb-3 gap-2">
               <div className="flex items-center gap-2">
                 <Send className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                  ITSM Integration & Work Order Dispatch
-                </h3>
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                    ITSM Integration Prototype
+                  </h3>
+                  <span className="text-[10px] text-slate-400">
+                    {targetSystem === 'ServiceNow' ? 'ServiceNow-compatible work-order payload' : 'Jira-compatible work-order payload'}
+                  </span>
+                </div>
               </div>
 
               <div className="flex items-center gap-2 text-xs">
@@ -566,14 +638,14 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                   {ticketResult ? (
                     <span className="text-emerald-400 flex items-center gap-1">
                       <CheckCircle2 className="w-4 h-4" />
-                      Active Ticket: {ticketResult.ticket_id} ({ticketResult.system})
+                      Active Prototype Ticket: {ticketResult.ticket_id} ({ticketResult.system})
                     </span>
                   ) : (
-                    <span>ServiceNow Dispatch Package Ready</span>
+                    <span>ServiceNow-compatible work-order payload ready</span>
                   )}
                 </div>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Payload includes correlated cell topology, subscriber count (1,284), revenue risk (12,500 DZD), and root-cause diagnostics.
+                  Pre-configured payload includes correlated cell topology, subscriber count (1,284), synthetic revenue risk (12,500 DZD), and root-cause evidence.
                 </p>
               </div>
 
@@ -593,11 +665,30 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
           {/* 7. OPERATIONAL EVENT TIMELINE (Requirement 8) */}
           <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-sm">
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-800 mb-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-sky-400" />
-                Operational Event Timeline (Execution Sequence)
-              </h3>
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-sky-400" />
+                  Operational Event Timeline & Lifecycle
+                </h3>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  Lifecycle: DETECTED ➔ INVESTIGATING ➔ DISPATCHED ➔ RESOLVED
+                </span>
+              </div>
               <span className="text-[10px] font-mono text-slate-500">CHRONOLOGICAL AUDIT</span>
+            </div>
+
+            {/* Lifecycle Stages Bar */}
+            <div className="grid grid-cols-4 gap-2 mb-3">
+              {[
+                { stage: 'DETECTED', active: true, completed: true, color: 'border-rose-500/40 text-rose-400 bg-rose-500/10' },
+                { stage: 'INVESTIGATING', active: true, completed: true, color: 'border-amber-500/40 text-amber-400 bg-amber-500/10' },
+                { stage: 'DISPATCHED', active: !!ticketResult, completed: !!ticketResult, color: ticketResult ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10' : 'border-slate-800 text-slate-500 bg-slate-900' },
+                { stage: 'RESOLVED', active: false, completed: false, color: 'border-slate-800 text-slate-600 bg-slate-900/50' },
+              ].map((s, i) => (
+                <div key={i} className={`p-1.5 rounded text-center border font-mono text-[10px] font-bold ${s.color}`}>
+                  {s.stage}
+                </div>
+              ))}
             </div>
 
             <div className="space-y-2">

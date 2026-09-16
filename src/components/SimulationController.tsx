@@ -262,7 +262,7 @@ export const SimulationController: React.FC<SimulationControllerProps> = ({
               </div>
               <p className="text-[11px] text-slate-400 mt-0.5">
                 {status.isActive 
-                  ? `7 degraded sectors in Saïda footprint • 1,284 affected subscribers • 12,500 DZD revenue at risk • P1 Priority`
+                  ? `7 degraded sectors in Saïda footprint • 1,284 affected subscribers • 12,500 DZD synthetic estimated revenue exposure • P1 Priority`
                   : 'All cells operating within nominal baseline parameters (0 anomalies detected)'}
               </p>
             </div>
@@ -474,10 +474,10 @@ export const SimulationController: React.FC<SimulationControllerProps> = ({
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
                     <Send className="w-4 h-4" />
-                    <span>4. Enterprise ITSM Dispatch Layer</span>
+                    <span>4. ITSM Integration Prototype (Work-Order Dispatch)</span>
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono">
-                    Target: ServiceNow Table API
+                    Target: ServiceNow-Compatible Payload
                   </span>
                 </div>
 
@@ -489,11 +489,11 @@ export const SimulationController: React.FC<SimulationControllerProps> = ({
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-white text-xs">{itsmDispatchedTicket.id}</span>
                           <span className="px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 text-[10px] rounded font-mono">
-                            ASSIGNED
+                            PROTOTYPE ASSIGNED
                           </span>
                         </div>
                         <p className="text-[11px] text-slate-400">
-                          Work order injected into {itsmDispatchedTicket.system} • Assigned to NOC-Transport-Tier2
+                          Work-order payload dispatched to {itsmDispatchedTicket.system} prototype registry • In-memory sandbox simulation
                         </p>
                       </div>
                     </div>
@@ -509,14 +509,14 @@ export const SimulationController: React.FC<SimulationControllerProps> = ({
                   </div>
                 ) : (
                   <div className="flex items-center justify-between bg-slate-900 p-3 rounded-lg border border-slate-800">
-                    <span className="text-slate-400 text-xs">Ready to dispatch automated work order to ITSM.</span>
+                    <span className="text-slate-400 text-xs">Ready to dispatch ServiceNow-compatible work order to prototype sandbox.</span>
                     <button
                       onClick={handleDispatchITSMTicket}
                       disabled={dispatchingITSM}
                       className="px-3.5 py-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1.5 transition cursor-pointer"
                     >
                       <Send className={`w-3.5 h-3.5 ${dispatchingITSM ? 'animate-spin' : ''}`} />
-                      <span>Create ITSM Ticket</span>
+                      <span>Create Prototype Ticket</span>
                     </button>
                   </div>
                 )}

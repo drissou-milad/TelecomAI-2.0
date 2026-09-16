@@ -350,7 +350,11 @@ app.get(['/api/models/performance', '/models/performance'], (_req, res) => {
 app.post(['/api/simulation/degrade', '/simulation/degrade'], (req, res) => {
   try {
     const wilaya = req.body.wilaya || 'Saida';
-    const result = simulateDegradation(wilaya);
+    const scenario = req.body.scenario;
+    const severity = req.body.severity || 'CRITICAL';
+    const result = scenario 
+      ? simulateScenario({ wilaya, scenario, severity })
+      : simulateDegradation(wilaya);
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: `Simulation error: ${err.message}` });
