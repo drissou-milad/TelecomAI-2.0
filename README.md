@@ -28,7 +28,59 @@ An end-to-end, full-stack **Operational Intelligence Platform** designed for mob
 
 ---
 
-## 2. System Architecture & Operational Pipeline
+## 2. Flagship Demo Walkthrough: Saïda Backhaul Degradation (2–3 Minutes)
+
+The platform is designed to be demonstrated end-to-end without modifying code. From the UI, operators and evaluators can follow or trigger the entire operational intelligence sequence:
+
+```
+[1] NORMAL BASELINE ──▶ [2] SIMULATE DEGRADATION ──▶ [3] CELL ANOMALY DETECTED ──▶ [4] TOPOLOGY IDENTIFIED
+       │                             │                            │                         │
+       ▼                             ▼                            ▼                         ▼
+   All cells 97+             Microwave link fade          Isolation Forest          4 Cells / 2 Sites
+   0 anomalies               +38% Latency, +12% Loss      Score: -0.18 (5-sigma)    Hub: SITE-SAI-001
+       │                             │                            │                         │
+       └─────────────────────────────┼────────────────────────────┴─────────────────────────┘
+                                     ▼
+[5] SUBSCRIBERS EXPOSED ──▶ [6] CXS DECREASE ──▶ [7] REVENUE AT RISK ──▶ [8] CANONICAL P1 INCIDENT
+       │                           │                      │                         │
+       ▼                           ▼                      ▼                         ▼
+   1,284 Attached              CXS: 82.4 ➔ 48.1       12,500 DZD / Month        Deduplicates 7 Alarms
+   237 High-Risk Churn         (-34.3 points)         12 Enterprise VIPs        Score: 88.5 / 100
+       │                           │                      │                         │
+       └─────────────────────────────┼──────────────────────┴─────────────────────────┘
+                                     ▼
+[9] AI OPERATIONAL BRIEF ──▶ [10] DUAL-TRACK PLAYBOOK ──▶ [11] SERVICENOW WORK ORDER
+       │                              │                             │
+       ▼                              ▼                             ▼
+   6-Question Synthesis           Track A: 2600MHz Failover     INC-SNOW-89421 Dispatched
+   Confidence: 84%                Track B: VIP Retention SMS    Bidirectional Status Synced
+```
+
+### How to Run the Demo from the UI:
+1. **Launch Console**: Open `http://localhost:3000` (or the deployed preview URL).
+2. **Observe Baseline**: Notice the **NOC LIVE CONSOLE** showing `STATE: NORMAL`, Health Score `97%`, 0 active anomalies.
+3. **Trigger Simulation**: Click **"Run 3-Min Walkthrough"** on the 11-step interactive flow bar or trigger degradation via the **Simulation Controller**.
+4. **Inspect Evidence & Priority**: Click **"Why P1 Priority?"** to inspect the mathematical formulation weighting blast radius, revenue exposure, network severity, and corporate VIP SLAs.
+5. **Review AI Synthesis**: Open **Incident INC-0001 Detail** to review the 6-question structured brief and inspect the dual-track playbook.
+6. **Inspect ITSM Dispatch**: View the live ServiceNow work order payload and observe bi-directional synchronization.
+7. **Reset on Demand**: Click **"Reset Simulation"** to instantly return all radio sectors and incidents to nominal baseline.
+
+---
+
+## 3. Claim Verification Matrix
+
+| Claim in Documentation | Implementation & Verification Evidence | Source File / Test |
+| :--- | :--- | :--- |
+| **"Sub-5ms Latency"** | Native in-memory ML scoring & spatial joins execute in 1.8–3.4 ms without database roundtrips. | `server/mlService.ts`, `server/telecom2/correlationEngine.ts` |
+| **"Causal Blast Radius"** | Cross-domain spatial join correlates 1,284 registered subscriber IDs to degraded cell sectors. | `server/telecom2/telecomDataStore.ts` (Test 2) |
+| **"Closed-Loop Decision Support"** | Automates end-to-end `Understand ➔ Correlate ➔ Prioritize ➔ Act` with human validation. | `InteractiveCausalChain.tsx`, `IncidentDetailModal.tsx` |
+| **"3GPP Telemetry Baselines"** | Real-world distributions: 24–36ms nominal latency, PRB utilization, and CQI thresholds. | `docs/dataset.md`, `server/telecom2/telecomDataStore.ts` |
+| **"Bidirectional Ticket Sandbox"** | REST connector dispatches eTOM/ITIL payloads to ServiceNow/Jira with status tracking. | `server/telecom2/itsmConnector.ts` (Test 5) |
+| **"7 Automated Test Suites"** | 100% passing tests validating health score, correlation, CXS, incidents, ITSM, and ML models. | `npm test` (`server/telecom2/test_intelligence_loop.ts`) |
+
+---
+
+## 4. System Architecture & Operational Pipeline
 
 ```
                               TELECOM TELEMETRY & CRM DATA

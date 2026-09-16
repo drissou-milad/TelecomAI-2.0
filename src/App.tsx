@@ -205,6 +205,29 @@ export default function App() {
     }));
   };
 
+  // Direct simulation degrade and reset handlers for flagship demonstrator
+  const handleSimulateDegrade = async () => {
+    try {
+      await fetch('/api/simulation/degrade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wilaya: 'Saida' })
+      });
+      handleRefreshAllData();
+    } catch (e) {
+      console.warn('Simulation degrade error:', e);
+    }
+  };
+
+  const handleResetBaseline = async () => {
+    try {
+      await fetch('/api/simulation/reset', { method: 'POST' });
+      handleRefreshAllData();
+    } catch (e) {
+      console.warn('Simulation reset error:', e);
+    }
+  };
+
   // Update incident (e.g. from ITSM dispatch)
   const handleUpdateIncident = (updated: TelecomIncident) => {
     setIncidents(prev => prev.map(i => i.id === updated.id ? updated : i));
@@ -256,6 +279,8 @@ export default function App() {
             onOpenIncidentDetail={() => handleOpenIncidentDetail('INC-0001')}
             onOpenScenarioCenter={() => setIsScenarioCenterOpen(true)}
             onNavigateToOperations={() => handleNavigate('operations')}
+            onSimulateDegrade={handleSimulateDegrade}
+            onResetBaseline={handleResetBaseline}
           />
         )}
 
